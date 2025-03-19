@@ -125,6 +125,18 @@
           "size_x": 1280,
           "size_y": 636
         }
+      },
+      {
+        "name": "dc2025_badge.kicad_sch",
+        "open": false,
+        "window": {
+          "display": 0,
+          "maximized": true,
+          "pos_x": 3080,
+          "pos_y": 1080,
+          "size_x": 1280,
+          "size_y": 720
+        }
       }
     ]
   },

@@ -6,4 +6,5 @@
   (lib (name "nfc_antenna")(type "KiCad")(uri "${KIPRJMOD}/lib/footprints/nfc_antenna.pretty")(options "")(descr ""))
   (lib (name "3xaa_battery_holder")(type "KiCad")(uri "${KIPRJMOD}/lib/footprints/3xaa_battery_holder.pretty")(options "")(descr ""))
   (lib (name "npth")(type "KiCad")(uri "${KIPRJMOD}/lib/footprints/npth.pretty")(options "")(descr ""))
+  (lib (name "logo")(type "KiCad")(uri "${KIPRJMOD}/lib/footprints/logo.pretty")(options "")(descr ""))
 )

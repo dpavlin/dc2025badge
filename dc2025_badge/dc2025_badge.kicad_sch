@@ -5222,6 +5222,101 @@
 					)
 				)
 			)
+			(symbol "SSSS811101_0_1"
+				(polyline
+					(pts
+						(xy 0 7.62) (xy 0 5.08)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "SSSS811101_1_1"
+				(pin passive line
+					(at 5.08 7.62 180)
+					(length 5.08)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "SH1"
+						(effects
+							(font
+								(size 0.27 0.27)
+							)
+						)
+					)
+					(alternate "SH1" input line)
+					(alternate "SH2" input line)
+					(alternate "SH3" input line)
+					(alternate "SH4" input line)
+				)
+				(pin passive line
+					(at 5.08 7.62 180)
+					(length 5.08)
+					(hide yes)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "SH2"
+						(effects
+							(font
+								(size 0.27 0.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 7.62 180)
+					(length 5.08)
+					(hide yes)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "SH3"
+						(effects
+							(font
+								(size 0.27 0.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 7.62 180)
+					(length 5.08)
+					(hide yes)
+					(name "~"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "SH4"
+						(effects
+							(font
+								(size 0.27 0.27)
+							)
+						)
+					)
+				)
+			)
 			(embedded_fonts no)
 		)
 		(symbol "power:GND"
@@ -5999,12 +6094,6 @@
 		(uuid "19471300-9127-4447-b796-5bad5a8538ce")
 	)
 	(junction
-		(at 95.25 101.6)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "1cb6833f-43ce-4305-9ca2-ff8184bf2c7e")
-	)
-	(junction
 		(at 125.73 46.99)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -6015,12 +6104,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "25747086-8298-4d98-bd46-a6146976abb4")
-	)
-	(junction
-		(at 116.84 86.36)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "2581fc73-d7ec-473f-af8a-e372a92c7613")
 	)
 	(junction
 		(at 114.3 46.99)
@@ -6089,12 +6172,6 @@
 		(uuid "53d12528-4a20-482d-9a28-c4b18d201f86")
 	)
 	(junction
-		(at 100.33 82.55)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "54eab22d-d358-443e-8626-ebfdb98da5be")
-	)
-	(junction
 		(at 130.81 82.55)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -6137,16 +6214,22 @@
 		(uuid "688d5d0c-b67f-426f-aa7a-d8ffc027bafd")
 	)
 	(junction
+		(at 85.09 85.09)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "68e6f879-433e-4663-bbe1-81888f8f3d84")
+	)
+	(junction
 		(at 30.48 170.18)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "69aa9979-aadf-4f95-8621-a5572d0d65ee")
 	)
 	(junction
-		(at 111.76 105.41)
+		(at 99.06 104.14)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "75a3516e-5160-4bf0-8b8a-fd19b21b67cf")
+		(uuid "750bf84f-850f-45ee-a82f-7529283983c2")
 	)
 	(junction
 		(at 163.83 35.56)
@@ -6233,10 +6316,28 @@
 		(uuid "a8da60ab-1b5f-4cfa-ba90-43c0ae0c6c80")
 	)
 	(junction
+		(at 85.09 90.17)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b6abf39d-be4f-40ae-854f-2cdd955260e0")
+	)
+	(junction
 		(at 35.56 170.18)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "bd9d3ba1-5453-4fdc-a3c4-9dc46c851b3b")
+	)
+	(junction
+		(at 114.3 93.98)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "be0b7151-6b1b-4497-b3f0-930f25048560")
+	)
+	(junction
+		(at 100.33 80.01)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "bfa758b2-46bd-4b11-abf1-6e2937b09d78")
 	)
 	(junction
 		(at 105.41 46.99)
@@ -6333,6 +6434,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "ee595431-e2ae-4fe8-8a90-3c7e23535e5e")
+	)
+	(junction
+		(at 99.06 99.06)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f6cd731c-27e2-414d-bb38-6589a20883d7")
 	)
 	(no_connect
 		(at 181.61 113.03)
@@ -6508,16 +6615,6 @@
 	)
 	(wire
 		(pts
-			(xy 100.33 82.55) (xy 100.33 85.09)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "014c2584-0074-4b82-84e7-f2f3711f5f29")
-	)
-	(wire
-		(pts
 			(xy 143.51 92.71) (xy 143.51 123.19)
 		)
 		(stroke
@@ -6668,6 +6765,16 @@
 	)
 	(wire
 		(pts
+			(xy 100.33 87.63) (xy 100.33 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0ed44161-92d0-48b8-94e1-9ef758b01071")
+	)
+	(wire
+		(pts
 			(xy 163.83 146.05) (xy 163.83 147.32)
 		)
 		(stroke
@@ -6695,16 +6802,6 @@
 			(type default)
 		)
 		(uuid "11eae9c6-f190-4767-b5f6-aa7bd67b0909")
-	)
-	(wire
-		(pts
-			(xy 111.76 105.41) (xy 116.84 105.41)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "13f58e9e-9a30-4f30-8838-62f2a6ded4ef")
 	)
 	(wire
 		(pts
@@ -6745,16 +6842,6 @@
 			(type default)
 		)
 		(uuid "1705e9f7-ff63-423c-9766-1043aec3582e")
-	)
-	(wire
-		(pts
-			(xy 111.76 86.36) (xy 116.84 86.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "17ce7f06-db2f-4c6e-8fe7-0cdd0284bfcc")
 	)
 	(wire
 		(pts
@@ -6825,26 +6912,6 @@
 			(type default)
 		)
 		(uuid "1c2b184b-3f0c-424b-aec9-0e87c67268dd")
-	)
-	(wire
-		(pts
-			(xy 116.84 105.41) (xy 116.84 104.14)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1e466ecf-5a1a-43bc-8de4-5aa93d5da6d0")
-	)
-	(wire
-		(pts
-			(xy 95.25 100.33) (xy 95.25 101.6)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "215b3e12-4cc0-4df9-9757-52d177bb23bd")
 	)
 	(wire
 		(pts
@@ -7058,16 +7125,6 @@
 	)
 	(wire
 		(pts
-			(xy 111.76 105.41) (xy 111.76 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3c46cc78-ebfc-4e4b-88cc-88b63d901ef6")
-	)
-	(wire
-		(pts
 			(xy 148.59 36.83) (xy 148.59 38.1)
 		)
 		(stroke
@@ -7178,6 +7235,16 @@
 	)
 	(wire
 		(pts
+			(xy 114.3 101.6) (xy 114.3 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "48684237-ffc5-494d-b48e-05e8fbad53d0")
+	)
+	(wire
+		(pts
 			(xy 218.44 85.09) (xy 218.44 90.17)
 		)
 		(stroke
@@ -7198,7 +7265,7 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 82.55) (xy 130.81 82.55)
+			(xy 114.3 82.55) (xy 130.81 82.55)
 		)
 		(stroke
 			(width 0)
@@ -7298,7 +7365,7 @@
 	)
 	(wire
 		(pts
-			(xy 116.84 82.55) (xy 116.84 86.36)
+			(xy 114.3 82.55) (xy 114.3 93.98)
 		)
 		(stroke
 			(width 0)
@@ -7498,6 +7565,16 @@
 	)
 	(wire
 		(pts
+			(xy 99.06 99.06) (xy 99.06 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "66906660-d83e-42fc-9b4a-ea0ee16c4742")
+	)
+	(wire
+		(pts
 			(xy 71.12 43.18) (xy 71.12 52.07)
 		)
 		(stroke
@@ -7555,16 +7632,6 @@
 			(type default)
 		)
 		(uuid "70ef212f-893f-43e6-bcc8-35efe7fa3081")
-	)
-	(wire
-		(pts
-			(xy 111.76 88.9) (xy 111.76 86.36)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "723e7789-2e21-4152-bbf8-38fd817d6336")
 	)
 	(wire
 		(pts
@@ -7728,16 +7795,6 @@
 	)
 	(wire
 		(pts
-			(xy 95.25 85.09) (xy 95.25 82.55)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "888f16ff-b02f-4a6e-96d5-3a540b1fda4b")
-	)
-	(wire
-		(pts
 			(xy 196.85 90.17) (xy 199.39 90.17)
 		)
 		(stroke
@@ -7838,6 +7895,26 @@
 	)
 	(wire
 		(pts
+			(xy 100.33 80.01) (xy 100.33 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9e3fe047-ab4b-4e63-8bcf-77bec4b07fc6")
+	)
+	(wire
+		(pts
+			(xy 114.3 104.14) (xy 99.06 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a0a131a0-eff8-4232-a35f-86cad4a4a308")
+	)
+	(wire
+		(pts
 			(xy 181.61 64.77) (xy 208.28 64.77)
 		)
 		(stroke
@@ -7868,16 +7945,6 @@
 	)
 	(wire
 		(pts
-			(xy 90.17 87.63) (xy 90.17 85.09)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a4a17ddf-6c7b-4be3-997d-2f4ebe7cbab1")
-	)
-	(wire
-		(pts
 			(xy 72.39 170.18) (xy 74.93 170.18)
 		)
 		(stroke
@@ -7888,33 +7955,13 @@
 	)
 	(wire
 		(pts
-			(xy 95.25 101.6) (xy 100.33 101.6)
+			(xy 114.3 93.98) (xy 114.3 99.06)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "ab6c881f-6196-44ec-bc20-3ff51e273dc4")
-	)
-	(wire
-		(pts
-			(xy 95.25 82.55) (xy 100.33 82.55)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ac72b014-b15d-4a52-a9f5-4bdd3ac11876")
-	)
-	(wire
-		(pts
-			(xy 106.68 88.9) (xy 109.22 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "af102f04-0b4a-46c7-afdc-36fa620e68f2")
+		(uuid "b3b9391f-bd16-49b3-987c-3218dd3f0677")
 	)
 	(wire
 		(pts
@@ -7978,6 +8025,16 @@
 	)
 	(wire
 		(pts
+			(xy 99.06 93.98) (xy 99.06 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bd3e44fd-9bcc-43c1-aac9-24a7545660d2")
+	)
+	(wire
+		(pts
 			(xy 196.85 106.68) (xy 196.85 105.41)
 		)
 		(stroke
@@ -7998,16 +8055,6 @@
 	)
 	(wire
 		(pts
-			(xy 111.76 105.41) (xy 111.76 104.14)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c106e915-7002-4c41-b5fb-910366dd2602")
-	)
-	(wire
-		(pts
 			(xy 142.24 53.34) (xy 142.24 57.15)
 		)
 		(stroke
@@ -8015,16 +8062,6 @@
 			(type default)
 		)
 		(uuid "c1d7b9c7-d9b5-43d3-b734-0fa67c1ce0ad")
-	)
-	(wire
-		(pts
-			(xy 116.84 86.36) (xy 116.84 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c4d9544f-c7df-40d7-a5cb-1dba9187a598")
 	)
 	(wire
 		(pts
@@ -8088,16 +8125,6 @@
 	)
 	(wire
 		(pts
-			(xy 106.68 91.44) (xy 106.68 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ca184b0f-76f2-4063-92a6-ed7350de8d34")
-	)
-	(wire
-		(pts
 			(xy 204.47 114.3) (xy 204.47 118.11)
 		)
 		(stroke
@@ -8105,6 +8132,16 @@
 			(type default)
 		)
 		(uuid "cf82f4be-589c-4f4d-b4ee-66255981b59c")
+	)
+	(wire
+		(pts
+			(xy 85.09 85.09) (xy 85.09 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d02cc272-7a0a-4352-9862-848072cb0561")
 	)
 	(wire
 		(pts
@@ -8148,16 +8185,6 @@
 	)
 	(wire
 		(pts
-			(xy 95.25 101.6) (xy 95.25 102.87)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d792f91a-5876-458f-89b9-1a5383a28e09")
-	)
-	(wire
-		(pts
 			(xy 44.45 80.01) (xy 49.53 80.01)
 		)
 		(stroke
@@ -8195,16 +8222,6 @@
 			(type default)
 		)
 		(uuid "db7733f9-9fc9-4eff-ab53-e6cd3bb7b06b")
-	)
-	(wire
-		(pts
-			(xy 90.17 85.09) (xy 92.71 85.09)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "dce38cc0-0c28-49b4-803b-fddf66cefc8d")
 	)
 	(wire
 		(pts
@@ -8268,6 +8285,26 @@
 	)
 	(wire
 		(pts
+			(xy 85.09 80.01) (xy 85.09 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ea900a6b-a945-4999-bf12-d9982e290115")
+	)
+	(wire
+		(pts
+			(xy 100.33 90.17) (xy 85.09 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ed1d4492-bde4-4924-9540-099a6ab220e3")
+	)
+	(wire
+		(pts
 			(xy 166.37 35.56) (xy 163.83 35.56)
 		)
 		(stroke
@@ -8275,16 +8312,6 @@
 			(type default)
 		)
 		(uuid "f0206d53-8658-49ff-8e60-eeb1dc6ff9fd")
-	)
-	(wire
-		(pts
-			(xy 100.33 80.01) (xy 100.33 82.55)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f0efdaf4-5b72-491f-9af8-25ffde2f085e")
 	)
 	(wire
 		(pts
@@ -8345,16 +8372,6 @@
 			(type default)
 		)
 		(uuid "f95cf5fb-5820-4ca7-acb2-5a82e379a557")
-	)
-	(wire
-		(pts
-			(xy 100.33 101.6) (xy 100.33 100.33)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fb0fd42d-23b1-4088-b4e8-f5fe01f183ad")
 	)
 	(label "SWDIO"
 		(at 185.42 90.17 0)
@@ -10171,7 +10188,7 @@
 				)
 			)
 		)
-		(property "Value" "Cover mount"
+		(property "Value" "Cover nut"
 			(at 160.655 179.07 90)
 			(effects
 				(font
@@ -10766,7 +10783,8 @@
 	)
 	(symbol
 		(lib_id "SKHMQLE010:SKHMQLE010")
-		(at 97.79 92.71 270)
+		(at 92.71 82.55 0)
+		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10774,7 +10792,7 @@
 		(dnp no)
 		(uuid "3d9a626d-5b4c-48b1-9c64-61ee7908a2ec")
 		(property "Reference" "S2"
-			(at 100.584 103.124 90)
+			(at 91.694 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10783,7 +10801,7 @@
 			)
 		)
 		(property "Value" "SKHMQLE010"
-			(at 90.17 91.4401 90)
+			(at 93.9799 90.17 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10793,7 +10811,7 @@
 			)
 		)
 		(property "Footprint" "SW_SKHMQLE010:SW_SKHMQLE010"
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10803,7 +10821,7 @@
 			)
 		)
 		(property "Datasheet" "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588893992046379008"
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10812,7 +10830,7 @@
 			)
 		)
 		(property "Description" "6.2mm 3.1mm Round Button 50mA Standing paste 6.5mm SPST 12V SMD Tactile Switches ROHS"
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10821,7 +10839,7 @@
 			)
 		)
 		(property "MPN" "SKHMQLE010"
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10830,7 +10848,7 @@
 			)
 		)
 		(property "Manufacturer" "ALPSALPINE "
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10839,7 +10857,7 @@
 			)
 		)
 		(property "Mouser#" ""
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10848,7 +10866,7 @@
 			)
 		)
 		(property "DigiKey#" ""
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10857,7 +10875,7 @@
 			)
 		)
 		(property "Farnell#" ""
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10866,7 +10884,7 @@
 			)
 		)
 		(property "JLCPCB#" "C139767"
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10875,7 +10893,7 @@
 			)
 		)
 		(property "LCSC#" ""
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10884,7 +10902,7 @@
 			)
 		)
 		(property "CanBeSubstituted" ""
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10893,7 +10911,7 @@
 			)
 		)
 		(property "AltManufacturer" ""
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10902,7 +10920,7 @@
 			)
 		)
 		(property "AltMPN" ""
-			(at 97.79 92.71 0)
+			(at 92.71 82.55 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11312,7 +11330,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "MountingHole"
+		(property "Value" "CoverMountingHole"
 			(at 154.94 190.4999 0)
 			(effects
 				(font
@@ -11620,7 +11638,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "5021bddd-b321-4745-9247-1df98107a2e6")
 		(property "Reference" "TP5"
 			(at 192.024 97.79 0)
@@ -11660,6 +11678,96 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 190.5 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
 			(at 190.5 92.71 0)
 			(effects
 				(font
@@ -11905,7 +12013,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" "FH"
+		(property "Manufacturer" "FH (Guangdong Fenghua Advanced Tech) "
 			(at 60.96 102.87 0)
 			(effects
 				(font
@@ -12111,7 +12219,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "USB 2.0-only 16P Type-C Receptacle connector"
+		(property "Description" "5A 1 16P Female Type-C SMD USB Connectors ROHS"
 			(at 269.24 87.63 0)
 			(effects
 				(font
@@ -12126,6 +12234,25 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "TYPE-C-31-M-12"
+			(at 269.24 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "Korean Hroparts Elec"
+			(at 269.24 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
 			)
 		)
 		(pin "A8"
@@ -12336,7 +12463,7 @@
 				)
 			)
 		)
-		(property "Value" "Cover mount"
+		(property "Value" "Cover nut"
 			(at 165.735 179.07 90)
 			(effects
 				(font
@@ -12637,7 +12764,8 @@
 	)
 	(symbol
 		(lib_id "SKHMQLE010:SKHMQLE010")
-		(at 114.3 96.52 270)
+		(at 106.68 96.52 0)
+		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12645,7 +12773,7 @@
 		(dnp no)
 		(uuid "63f6d445-27ae-4c0b-9a78-ea28f7ad1223")
 		(property "Reference" "S3"
-			(at 117.602 106.934 90)
+			(at 105.41 91.694 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12654,7 +12782,7 @@
 			)
 		)
 		(property "Value" "SKHMQLE010"
-			(at 106.68 95.2501 90)
+			(at 107.9499 104.14 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12664,7 +12792,7 @@
 			)
 		)
 		(property "Footprint" "SW_SKHMQLE010:SW_SKHMQLE010"
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12674,7 +12802,7 @@
 			)
 		)
 		(property "Datasheet" "https://jlcpcb.com/api/file/downloadByFileSystemAccessId/8588893992046379008"
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12683,7 +12811,7 @@
 			)
 		)
 		(property "Description" "6.2mm 3.1mm Round Button 50mA Standing paste 6.5mm SPST 12V SMD Tactile Switches ROHS"
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12692,7 +12820,7 @@
 			)
 		)
 		(property "MPN" "SKHMQLE010"
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12701,7 +12829,7 @@
 			)
 		)
 		(property "Manufacturer" "ALPSALPINE "
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12710,7 +12838,7 @@
 			)
 		)
 		(property "Mouser#" ""
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12719,7 +12847,7 @@
 			)
 		)
 		(property "DigiKey#" ""
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12728,7 +12856,7 @@
 			)
 		)
 		(property "Farnell#" ""
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12737,7 +12865,7 @@
 			)
 		)
 		(property "JLCPCB#" "C139767"
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12746,7 +12874,7 @@
 			)
 		)
 		(property "LCSC#" ""
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12755,7 +12883,7 @@
 			)
 		)
 		(property "CanBeSubstituted" ""
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12764,7 +12892,7 @@
 			)
 		)
 		(property "AltManufacturer" ""
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12773,7 +12901,7 @@
 			)
 		)
 		(property "AltMPN" ""
-			(at 114.3 96.52 0)
+			(at 106.68 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13521,7 +13649,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "MountingHole"
+		(property "Value" "CoverMountingHole"
 			(at 160.02 190.4999 0)
 			(effects
 				(font
@@ -13715,7 +13843,7 @@
 				)
 			)
 		)
-		(property "Value" "Cover mount"
+		(property "Value" "Cover nut"
 			(at 170.815 179.07 90)
 			(effects
 				(font
@@ -14014,6 +14142,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 50.8 165.1 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "80c847ad-d6f8-4885-a79b-e16b805cda74")
+		(property "Reference" "#PWR072"
+			(at 50.8 171.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 50.8 168.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" ""
+			(at 50.8 165.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 50.8 165.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 50.8 165.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ef285fa9-97d1-4f78-9bee-f6f4ce31be53")
+		)
+		(instances
+			(project "dc2025_badge"
+				(path "/90dbbb20-3467-47d4-ab5e-4ef7af11f19e"
+					(reference "#PWR072")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Mechanical:MountingHole")
 		(at 162.56 189.23 0)
 		(unit 1)
@@ -14031,7 +14225,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "MountingHole"
+		(property "Value" "CoverMountingHole"
 			(at 165.1 190.4999 0)
 			(effects
 				(font
@@ -14347,7 +14541,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "8dc21090-c210-4c30-81d9-5dad55568925")
 		(property "Reference" "TP2"
 			(at 116.332 118.618 90)
@@ -14395,6 +14589,96 @@
 				(hide yes)
 			)
 		)
+		(property "MPN" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
+			(at 118.11 120.65 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "cf910a49-5b3e-4ff8-914d-d30edaed9b03")
 		)
@@ -14402,72 +14686,6 @@
 			(project "dc2025_badge"
 				(path "/90dbbb20-3467-47d4-ab5e-4ef7af11f19e"
 					(reference "TP2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 111.76 106.68 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "8ef927d0-835c-41ab-8281-11c160960404")
-		(property "Reference" "#PWR044"
-			(at 111.76 113.03 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 111.76 110.49 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" ""
-			(at 111.76 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 111.76 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 111.76 106.68 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "a7f977ae-0169-44d4-b06d-e95ff5468918")
-		)
-		(instances
-			(project "dc2025_badge"
-				(path "/90dbbb20-3467-47d4-ab5e-4ef7af11f19e"
-					(reference "#PWR044")
 					(unit 1)
 				)
 			)
@@ -14610,7 +14828,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "9b9f471d-59b5-4bc3-9871-1c8092b3c34a")
 		(property "Reference" "TP4"
 			(at 141.986 52.07 0)
@@ -14658,6 +14876,96 @@
 				(hide yes)
 			)
 		)
+		(property "MPN" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
+			(at 143.51 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "e36828ee-efeb-419b-81ad-48b4a485cdcb")
 		)
@@ -14688,7 +14996,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "MountingHole"
+		(property "Value" "CoverMountingHole"
 			(at 170.18 190.4999 0)
 			(effects
 				(font
@@ -14741,7 +15049,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "9e5aad7f-3634-4742-a3dd-4a334dff0dd9")
 		(property "Reference" "TP7"
 			(at 92.456 31.75 0)
@@ -14781,6 +15089,96 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 93.98 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
 			(at 93.98 36.83 0)
 			(effects
 				(font
@@ -15178,7 +15576,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "62.5mW Thick Film Resistors 50V ±100ppm/℃ ±1% 5.1kΩ 0402 Chip Resistor - Surface Mount ROHS"
 			(at 242.57 106.68 0)
 			(effects
 				(font
@@ -15193,6 +15591,25 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 242.57 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)"
+			(at 242.57 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
 			)
 		)
 		(pin "2"
@@ -15516,6 +15933,126 @@
 				(hide yes)
 			)
 		)
+		(property "MF" "ALPS"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MAXIMUM_PACKAGE_HEIGHT" "1.60 mm"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Package" "None"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Price" "None"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Check_prices" "https://www.snapeda.com/parts/SSSS811101/ALPS/view-part/?ref=eda"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "STANDARD" "Manufacturer Recommendations"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "PARTREV" "N/A"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "SnapEDA_Link" "https://www.snapeda.com/parts/SSSS811101/ALPS/view-part/?ref=snap"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MP" "SSSS811101"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Description_1" "Switch Slide SP Side Slide 0.3A 5VDC 10000Cycles Gull Wing SMD T/R"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "Availability" "In Stock"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "MANUFACTURER" "ALPS"
+			(at 43.18 160.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify bottom)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "5e8465e2-0f52-46ba-8031-5ac5bf48e925")
 		)
@@ -15524,6 +16061,18 @@
 		)
 		(pin "1"
 			(uuid "99176084-087b-4674-9b96-42d8a74ee1e5")
+		)
+		(pin "SH1"
+			(uuid "6d546776-225e-4e6f-b19b-a185bb2a09a3")
+		)
+		(pin "SH2"
+			(uuid "292abcba-0018-4e8d-ba83-eaa7a0f59002")
+		)
+		(pin "SH3"
+			(uuid "f49dcef1-b574-46f7-82e6-d23932f6a742")
+		)
+		(pin "SH4"
+			(uuid "cea7b438-ac32-4210-93af-b3392272cb50")
 		)
 		(instances
 			(project ""
@@ -15738,7 +16287,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b3108f1d-46cc-4fda-850e-369f4ea1f66a")
 		(property "Reference" "J2"
@@ -15779,6 +16328,96 @@
 			)
 		)
 		(property "Description" "Cortex Debug Connector, standard ARM Cortex-M SWD and JTAG interface"
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 31.75 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
 			(at 31.75 50.8 0)
 			(effects
 				(font
@@ -15888,9 +16527,10 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
 			)
 		)
-		(property "MPN" ""
+		(property "MPN" "STM32L053R8T6"
 			(at 163.83 97.79 0)
 			(effects
 				(font
@@ -15899,7 +16539,7 @@
 				(hide yes)
 			)
 		)
-		(property "Manufacturer" ""
+		(property "Manufacturer" "STMicroelectronics"
 			(at 163.83 97.79 0)
 			(effects
 				(font
@@ -16248,7 +16888,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 90.17 87.63 0)
+		(at 85.09 90.17 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -16256,7 +16896,7 @@
 		(dnp no)
 		(uuid "b4e3c84a-82d7-422c-86da-652b54f470eb")
 		(property "Reference" "#PWR073"
-			(at 90.17 93.98 0)
+			(at 85.09 96.52 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16265,7 +16905,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 90.17 91.44 0)
+			(at 85.09 93.98 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16274,7 +16914,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 90.17 87.63 0)
+			(at 85.09 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16283,7 +16923,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 90.17 87.63 0)
+			(at 85.09 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16292,7 +16932,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 90.17 87.63 0)
+			(at 85.09 90.17 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -16319,7 +16959,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "b51b5206-a349-4dfa-a384-c251c4560b89")
 		(property "Reference" "TP8"
 			(at 95.504 52.07 0)
@@ -16359,6 +16999,96 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 93.98 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
 			(at 93.98 46.99 0)
 			(effects
 				(font
@@ -16470,72 +17200,6 @@
 			(project "dc2025_badge"
 				(path "/90dbbb20-3467-47d4-ab5e-4ef7af11f19e"
 					(reference "C4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 106.68 91.44 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b6ef2281-1cb6-4614-b042-88e552b4a076")
-		(property "Reference" "#PWR072"
-			(at 106.68 97.79 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 106.68 95.25 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" ""
-			(at 106.68 91.44 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 106.68 91.44 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 106.68 91.44 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "5a8579e5-e06e-40b9-be06-f83e17201374")
-		)
-		(instances
-			(project "dc2025_badge"
-				(path "/90dbbb20-3467-47d4-ab5e-4ef7af11f19e"
-					(reference "#PWR072")
 					(unit 1)
 				)
 			)
@@ -16953,7 +17617,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "62.5mW Thick Film Resistors 50V ±100ppm/℃ ±1% 5.1kΩ 0402 Chip Resistor - Surface Mount ROHS"
 			(at 196.85 110.49 0)
 			(effects
 				(font
@@ -16968,6 +17632,25 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 196.85 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)"
+			(at 196.85 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
 			)
 		)
 		(pin "2"
@@ -17189,7 +17872,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "62.5mW Thick Film Resistors 50V ±100ppm/℃ ±1% 5.1kΩ 0402 Chip Resistor - Surface Mount ROHS"
 			(at 204.47 110.49 0)
 			(effects
 				(font
@@ -17204,6 +17887,25 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 204.47 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)"
+			(at 204.47 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
 			)
 		)
 		(pin "2"
@@ -17718,7 +18420,7 @@
 				)
 			)
 		)
-		(property "Value" "Cover mount"
+		(property "Value" "Cover nut"
 			(at 155.575 179.07 90)
 			(effects
 				(font
@@ -18291,7 +18993,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Resistor"
+		(property "Description" "62.5mW Thick Film Resistors 50V ±100ppm/℃ ±1% 5.1kΩ 0402 Chip Resistor - Surface Mount ROHS"
 			(at 234.95 106.68 0)
 			(effects
 				(font
@@ -18306,6 +19008,25 @@
 				(font
 					(size 1.27 1.27)
 				)
+				(hide yes)
+			)
+		)
+		(property "MPN" "0402WGF5101TCE"
+			(at 234.95 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" "UNI-ROYAL(Uniroyal Elec)"
+			(at 234.95 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
 			)
 		)
 		(pin "2"
@@ -18793,7 +19514,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "de59d90f-55de-40f0-9a9a-e4c282dde111")
 		(property "Reference" "TP1"
 			(at 111.506 121.412 90)
@@ -18833,6 +19554,96 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "MPN" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 113.03 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
 			(at 113.03 123.19 0)
 			(effects
 				(font
@@ -18956,7 +19767,7 @@
 		(exclude_from_sim no)
 		(in_bom no)
 		(on_board yes)
-		(dnp yes)
+		(dnp no)
 		(uuid "e81b5bdf-1cf1-43e4-b932-de25ac022477")
 		(property "Reference" "TP6"
 			(at 198.374 95.25 0)
@@ -19004,6 +19815,96 @@
 				(hide yes)
 			)
 		)
+		(property "MPN" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Manufacturer" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Mouser#" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "DigiKey#" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Farnell#" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "JLCPCB#" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC#" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "CanBeSubstituted" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltManufacturer" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "AltMPN" ""
+			(at 196.85 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "2040726d-3eef-4a1b-8e2f-572d5697ced3")
 		)
@@ -19018,7 +19919,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 95.25 102.87 0)
+		(at 99.06 104.14 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -19026,7 +19927,7 @@
 		(dnp no)
 		(uuid "e82a8329-580a-4a8b-8d65-3c63394eccd3")
 		(property "Reference" "#PWR045"
-			(at 95.25 109.22 0)
+			(at 99.06 110.49 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19035,7 +19936,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 95.25 106.68 0)
+			(at 99.06 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19044,7 +19945,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 95.25 102.87 0)
+			(at 99.06 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19053,7 +19954,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 95.25 102.87 0)
+			(at 99.06 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -19062,7 +19963,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 95.25 102.87 0)
+			(at 99.06 104.14 0)
 			(effects
 				(font
 					(size 1.27 1.27)

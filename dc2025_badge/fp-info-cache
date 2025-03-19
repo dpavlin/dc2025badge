@@ -1,4 +1,4 @@
-24749904465641294
+24768412182333781
 3xaa_battery_holder
 keystone_2464
 
@@ -64651,6 +64651,41 @@ solder jumper open
 0
 3
 3
+KiKit
+Board
+Mark board for extraction
+
+0
+0
+0
+KiKit
+Error
+Mark board for extraction
+
+0
+0
+0
+KiKit
+Fiducial
+Circular Fiducial
+fiducial
+0
+1
+0
+KiKit
+NPTH
+
+
+0
+0
+0
+KiKit
+Tab
+A symbol representing annotation for tab placement
+
+0
+0
+0
 LED_SMD
 LED-APA102-2020
 http://www.led-color.com/upload/201604/APA102-2020%20SMD%20LED.pdf
@@ -99539,6 +99574,34 @@ Varistor VF
 0
 2
 2
+logo
+hg_logo
+
+
+0
+0
+0
+logo
+hg_logo_sm
+
+
+0
+0
+0
+logo
+hg_logo_text
+
+
+0
+0
+0
+logo
+hg_logo_text_sm
+
+
+0
+0
+0
 nfc_antenna
 nfc_antenna
 
@@ -99546,3 +99609,17 @@ nfc_antenna
 0
 2
 2
+npth
+NPTH05
+
+
+0
+0
+0
+npth
+NPTH10
+
+
+0
+0
+0

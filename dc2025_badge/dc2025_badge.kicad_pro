@@ -84,6 +84,14 @@
           ""
         ],
         [
+          "lib_footprint_mismatch|80968966|122952137|f8f4d6a9-c0bd-4e9a-b444-de60de2efbb5|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "lib_footprint_mismatch|84099999|116901394|0f42a26f-ea2f-49cb-a784-3f8c149d98a5|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
           "shorting_items|93596447|109700000|09a589d1-d245-4204-9c77-a2a15354b50c|ab4f8b35-f117-4afb-bdf6-5ad77ddd5876",
           ""
         ],
@@ -97,6 +105,146 @@
         ],
         [
           "solder_mask_bridge|96346447|113700000|d11e93c2-cbd8-4214-8ab3-5f9e319db512|0e5b98b6-e660-43c9-9037-5f11b0ae5f04",
+          ""
+        ],
+        [
+          "text_thickness|244100000|100200000|fbd6a280-0f9f-49a9-9605-e4b3fb7ea0db|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "text_thickness|78600000|126150000|02f73915-2373-4d86-aed8-9ead333a76fa|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|168371447|120000000|21939698-650e-4677-a207-7c90a04d48ff|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|171521447|123250000|c0ef2063-65ee-4713-bab1-333c667e2e98|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|174671447|126500000|1a91ede3-fc73-4973-a2cf-5f6654e8a50e|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|175621447|109225000|e62a7024-e304-42c0-9564-a76ec3836ef0|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|175646447|112475000|db1dc310-0c90-4db4-8a27-1eca8b761599|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|175646447|115725000|adf15ce3-f7aa-4122-ac18-48d070fe69cb|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|177821447|106975000|039610b8-8639-492d-add8-0a2410d9887f|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|177821447|126500000|a2780b6d-5d4c-4fc1-ae53-e4c1f086a656|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|178896447|105975000|f059c24c-5ecb-422a-887c-c671da87ac89|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|178896447|118975000|b03c4ad6-ce67-4e11-836a-0296393925d1|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|180971447|103750000|4cf4f6d4-8698-4f54-8de9-58e48cbf2aaa|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|180971447|126500000|9aa497f5-e4fc-4ba0-924e-7be0bdec1e00|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|181921447|122225000|8be79f9a-8bb9-458f-a628-8347c1f4586c|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|181921447|125475000|13ef2cf5-531e-4766-9074-66d878e7962c|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|184121447|103750000|7d07cadd-8b61-49b2-b2f0-2fe4cdfd0ec6|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|187271447|107000000|4eeb85a0-b79c-47f5-a1e4-d3044cf68158|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|187271447|120000000|0d9614f6-142a-4c5b-ac7c-be9e6804a5bb|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|187271447|97250000|4307a273-6a96-4beb-b436-7b93056953c2|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|188296447|86475000|0ac6f1e8-0865-4f5a-9b4f-708c98db011f|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|190421447|120000000|b58bf463-1a2e-429b-9a1e-a2f1c69c3079|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|190421447|97250000|5cf09471-425e-43db-a500-ffef3cd0de13|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|191396447|89725000|9a1d95b1-7047-4364-afb9-280e29a704c9|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|191396447|99475000|dc31a3aa-ef2a-403a-b16b-2122a6a9023d|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|191421447|118975000|148dfaba-c2eb-4631-b682-b1f6bef46181|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|193571447|116825000|835566eb-5902-4c39-a416-ce9c595b2ef0|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|193571447|97250000|c9f9df1b-5d01-4c56-9157-ac5cb194e35d|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|194621447|115725000|b46a1116-3c10-4f8d-9093-d34d497854dd|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|194646447|102725000|99f765a5-1afd-4f4b-8ba5-9bba1477e913|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|194646447|112475000|0231e38f-a5c8-4e16-838e-7f88ed6dcfe0|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|194646447|92975000|8c4fd456-c4b5-40f7-9504-15e9f62add15|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|194646447|96225000|63f47200-62c3-4a56-8b0c-0af729318dec|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|194671447|105975000|db98ff0b-6b7e-44ab-b8a2-fa0e515f55d5|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "track_dangling|194671447|109225000|e132c1c2-8f0c-43ca-9c44-a745da0e54de|00000000-0000-0000-0000-000000000000",
           ""
         ]
       ],
@@ -710,45 +858,63 @@
           "show": true
         },
         {
-          "group_by": false,
-          "label": "JLCPCB#",
-          "name": "JLCPCB#",
-          "show": true
-        },
-        {
           "group_by": true,
           "label": "Value",
           "name": "Value",
           "show": true
         },
         {
+          "group_by": false,
+          "label": "JLCPCB#",
+          "name": "JLCPCB#",
+          "show": true
+        },
+        {
+          "group_by": false,
+          "label": "MPN",
+          "name": "MPN",
+          "show": true
+        },
+        {
           "group_by": true,
           "label": "DNP",
           "name": "${DNP}",
-          "show": true
+          "show": false
         },
         {
-          "group_by": true,
+          "group_by": false,
           "label": "Exclude from BOM",
           "name": "${EXCLUDE_FROM_BOM}",
-          "show": true
+          "show": false
         },
         {
-          "group_by": true,
+          "group_by": false,
           "label": "Exclude from Board",
           "name": "${EXCLUDE_FROM_BOARD}",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Manufacturer",
+          "name": "Manufacturer",
           "show": true
         },
         {
-          "group_by": true,
-          "label": "Footprint",
-          "name": "Footprint",
+          "group_by": false,
+          "label": "Description",
+          "name": "Description",
           "show": true
         },
         {
           "group_by": false,
           "label": "Datasheet",
           "name": "Datasheet",
+          "show": true
+        },
+        {
+          "group_by": true,
+          "label": "Footprint",
+          "name": "Footprint",
           "show": true
         },
         {
@@ -789,18 +955,6 @@
         },
         {
           "group_by": false,
-          "label": "MPN",
-          "name": "MPN",
-          "show": false
-        },
-        {
-          "group_by": false,
-          "label": "Manufacturer",
-          "name": "Manufacturer",
-          "show": false
-        },
-        {
-          "group_by": false,
           "label": "Mouser#",
           "name": "Mouser#",
           "show": false
@@ -819,15 +973,9 @@
         },
         {
           "group_by": false,
-          "label": "Description",
-          "name": "Description",
-          "show": false
-        },
-        {
-          "group_by": false,
           "label": "#",
           "name": "${ITEM_NUMBER}",
-          "show": false
+          "show": true
         }
       ],
       "filter_string": "",
@@ -835,7 +983,7 @@
       "include_excluded_from_bom": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "Reference"
+      "sort_field": "JLCPCB#"
     },
     "connection_grid_size": 50.0,
     "drawing": {
