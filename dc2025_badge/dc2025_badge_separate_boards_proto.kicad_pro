@@ -58,104 +58,7 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [
-        [
-          "clearance|93521447|109700000|a1ba884a-507c-46cb-b9c7-62c02f2972d4|09a589d1-d245-4204-9c77-a2a15354b50c",
-          ""
-        ],
-        [
-          "clearance|96346447|113700000|0e5b98b6-e660-43c9-9037-5f11b0ae5f04|d11e93c2-cbd8-4214-8ab3-5f9e319db512",
-          ""
-        ],
-        [
-          "courtyards_overlap|62253509|81522871|03452999-7a8f-437f-899e-18467afa2417|4f749d9e-48d9-4311-bfea-cd11ce697768",
-          "TP under battery holder"
-        ],
-        [
-          "courtyards_overlap|62253509|90522871|03452999-7a8f-437f-899e-18467afa2417|3c873f63-0052-4cbd-b9b5-9d7fc5448b17",
-          "TP under battery holder"
-        ],
-        [
-          "hole_clearance|133816447|87950000|3b18501d-89b3-4686-ab53-db34a438d3f2|022e4109-4eb7-4da2-9eed-22e4af18573b",
-          "USB C"
-        ],
-        [
-          "hole_clearance|133816447|87950000|3b18501d-89b3-4686-ab53-db34a438d3f2|4b285be3-02dd-4266-8ab2-bbef9d906557",
-          "USB C"
-        ],
-        [
-          "hole_clearance|133816447|94050000|174095b9-658f-41f6-93bb-7d15705541dc|008c63de-66f7-4800-8092-a46fd0264c02",
-          "USB C"
-        ],
-        [
-          "hole_clearance|133816447|94050000|174095b9-658f-41f6-93bb-7d15705541dc|b365eb02-6401-4633-8a58-3c120c343902",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|109146447|92500000|beb59515-0efc-4eee-b3e7-8b2760510417|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|118908947|93000000|691a7fe2-f823-483a-813b-4ccf2f91b774|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|125033947|102300000|21973e53-31f0-4398-89df-f763f6d71a6c|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|131083947|102212500|d292f6a9-9f31-4b5e-a456-b36e2202c248|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|44946447|89462500|a30d2155-7533-4a4e-94bb-82a6b885a9a2|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|78446447|103950000|3081b85d-2403-4b81-9f53-2f5e5dbb859b|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|80968966|122952137|f8f4d6a9-c0bd-4e9a-b444-de60de2efbb5|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|84099999|116901394|0f42a26f-ea2f-49cb-a784-3f8c149d98a5|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|85146447|101700000|034e274e-f16e-414b-b4c1-62cca86d12a0|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|85146447|104700000|0ac66e6f-200f-47cc-89cd-2e0ba89f33a4|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "lib_footprint_mismatch|91546447|89332500|467ffa29-4b51-427c-9873-0fbd79a366ff|00000000-0000-0000-0000-000000000000",
-          ""
-        ],
-        [
-          "shorting_items|93596447|109700000|09a589d1-d245-4204-9c77-a2a15354b50c|ab4f8b35-f117-4afb-bdf6-5ad77ddd5876",
-          ""
-        ],
-        [
-          "shorting_items|96346447|114000000|8f45f943-e9d1-4dde-a4ec-7d25dac19348|d11e93c2-cbd8-4214-8ab3-5f9e319db512",
-          ""
-        ],
-        [
-          "solder_mask_bridge|93521447|109700000|09a589d1-d245-4204-9c77-a2a15354b50c|a1ba884a-507c-46cb-b9c7-62c02f2972d4",
-          ""
-        ],
-        [
-          "solder_mask_bridge|96346447|113700000|d11e93c2-cbd8-4214-8ab3-5f9e319db512|0e5b98b6-e660-43c9-9037-5f11b0ae5f04",
-          ""
-        ],
-        [
-          "text_thickness|78600000|126150000|02f73915-2373-4d86-aed8-9ead333a76fa|00000000-0000-0000-0000-000000000000",
-          ""
-        ]
-      ],
+      "drc_exclusions": [],
       "meta": {
         "version": 2
       },
@@ -203,9 +106,8 @@
         "silk_overlap": "ignore",
         "skew_out_of_range": "error",
         "solder_mask_bridge": "error",
-        "starved_thermal": "ignore",
+        "starved_thermal": "error",
         "text_height": "warning",
-        "text_on_edge_cuts": "error",
         "text_thickness": "warning",
         "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
@@ -728,7 +630,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "/tmp/",
+      "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "3D/dc2025_badge.step",
@@ -773,57 +675,33 @@
           "show": true
         },
         {
-          "group_by": false,
-          "label": "JLCPCB#",
-          "name": "JLCPCB#",
-          "show": true
-        },
-        {
-          "group_by": false,
-          "label": "MPN",
-          "name": "MPN",
+          "group_by": true,
+          "label": "DNP",
+          "name": "${DNP}",
           "show": true
         },
         {
           "group_by": true,
-          "label": "DNP",
-          "name": "${DNP}",
-          "show": false
-        },
-        {
-          "group_by": false,
           "label": "Exclude from BOM",
           "name": "${EXCLUDE_FROM_BOM}",
-          "show": false
+          "show": true
         },
         {
-          "group_by": false,
+          "group_by": true,
           "label": "Exclude from Board",
           "name": "${EXCLUDE_FROM_BOARD}",
-          "show": false
-        },
-        {
-          "group_by": false,
-          "label": "Manufacturer",
-          "name": "Manufacturer",
-          "show": true
-        },
-        {
-          "group_by": false,
-          "label": "Description",
-          "name": "Description",
-          "show": true
-        },
-        {
-          "group_by": false,
-          "label": "Datasheet",
-          "name": "Datasheet",
           "show": true
         },
         {
           "group_by": true,
           "label": "Footprint",
           "name": "Footprint",
+          "show": true
+        },
+        {
+          "group_by": false,
+          "label": "Datasheet",
+          "name": "Datasheet",
           "show": true
         },
         {
@@ -852,6 +730,12 @@
         },
         {
           "group_by": false,
+          "label": "JLCPCB#",
+          "name": "JLCPCB#",
+          "show": false
+        },
+        {
+          "group_by": false,
           "label": "JLCPCB_CORRECTION",
           "name": "JLCPCB_CORRECTION",
           "show": false
@@ -860,6 +744,18 @@
           "group_by": false,
           "label": "LCSC#",
           "name": "LCSC#",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "MPN",
+          "name": "MPN",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Manufacturer",
+          "name": "Manufacturer",
           "show": false
         },
         {
@@ -882,9 +778,15 @@
         },
         {
           "group_by": false,
+          "label": "Description",
+          "name": "Description",
+          "show": false
+        },
+        {
+          "group_by": false,
           "label": "#",
           "name": "${ITEM_NUMBER}",
-          "show": true
+          "show": false
         }
       ],
       "filter_string": "",
@@ -892,7 +794,7 @@
       "include_excluded_from_bom": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "JLCPCB#"
+      "sort_field": "Reference"
     },
     "connection_grid_size": 50.0,
     "drawing": {

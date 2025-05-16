@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "DC2025 Badge")
-		(date "2025-03-18")
-		(rev "1")
+		(date "2025-05-04")
+		(rev "2")
 		(company "HYPERGLITCH Ltd")
 		(comment 1 "Igor Brkic")
 	)

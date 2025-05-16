@@ -3,4 +3,5 @@
   (lib (name "ST25R3916")(type "KiCad")(uri "${KIPRJMOD}/lib/symbols/ST25R3916.kicad_sym")(options "")(descr ""))
   (lib (name "SSSS811101")(type "KiCad")(uri "${KIPRJMOD}/lib/symbols/SSSS811101.kicad_sym")(options "")(descr ""))
   (lib (name "SKHMQLE010")(type "KiCad")(uri "${KIPRJMOD}/lib/symbols/SKHMQLE010.kicad_sym")(options "")(descr ""))
+  (lib (name "pushbutton")(type "KiCad")(uri "${KIPRJMOD}/lib/symbols/pushbutton.kicad_sym")(options "")(descr ""))
 )
