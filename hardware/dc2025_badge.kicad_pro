@@ -733,7 +733,7 @@
       "specctra_dsn": "",
       "step": "3D/dc2025_badge.step",
       "svg": "",
-      "vrml": "3D/dc2025_badge.wrl"
+      "vrml": "3D/dc2025_badge_no_bat.wrl"
     },
     "page_layout_descr_file": ""
   },
