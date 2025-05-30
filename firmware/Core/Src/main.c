@@ -224,7 +224,7 @@ bool configuration_load(){
 	}
 
 	// copy to main config
-	memcpy(g_config, g_config_loaded, SETT_CONFIG_END*sizeof(uint32_t));
+	memcpy((uint32_t*)g_config, (uint32_t*)g_config_loaded, SETT_CONFIG_END*sizeof(uint32_t));
 
 	bprintf("Config loaded\r\n");
 	return true;
@@ -288,7 +288,7 @@ bool configuration_save(bool clear){
 int tcnt(int *tnt){
   *tnt = 0;
   uint32_t (*s)(const uint8_t *d, size_t l) = crc32;
-  uint32_t *p = &g_config[SETT_THUNT_DATA0];
+  volatile uint32_t *p = &g_config[SETT_THUNT_DATA0];
   *tnt |= ((~((uint8_t)(((p[1]>>16)&0xff))))&0xf)!=(p[1]&0xff);
   *tnt |= s((const uint8_t*)p,1<<3)!=p[2];
   return g_config[SETT_THUNT_DATA1]&0xff;
@@ -303,7 +303,7 @@ void tset(int p){
 	int tn;
 	const int cnt = tcnt(&tn);
 	if(tn && cnt!=0) return;
-	uint32_t *t = &(g_config[SETT_THUNT_DATA0]);
+	volatile uint32_t *t = &(g_config[SETT_THUNT_DATA0]);
 	if(*t&(1<<p)) return;
 	*t |= 1<<p;
 	int c=0;
@@ -316,8 +316,15 @@ void tset(int p){
 
 bool bchk(int p){
   const int seg = p>>5;
-  uint32_t *d = &g_config[SETT_OTHERS_DATA0];
+  volatile uint32_t *d = &g_config[SETT_OTHERS_DATA0];
   return d[seg] & 1<<(p-(seg<<5));
+}
+
+int bcnt(int *tnt){
+  uint32_t (*f)(const uint8_t *d, size_t l) = crc32;
+  volatile uint32_t *d = &g_config[SETT_OTHERS_DATA0];
+  *tnt = d[5] != f((uint8_t*)d, (1<<7)/8+4);
+  return d[4];
 }
 
 void bset(int p){
@@ -330,20 +337,13 @@ void bset(int p){
 
   uint32_t (*f)(const uint8_t *d, size_t l) = crc32;
   int seg = p>>5;
-  uint32_t *d = &g_config[SETT_OTHERS_DATA0];
+  volatile uint32_t *d = &g_config[SETT_OTHERS_DATA0];
   d[seg] |= 1<<(p-(seg<<5));
   int c=0;
   for(int dd=0; dd<4; dd++) for(int i=0; i<32; i++) c+= d[dd]&(1<<i)?1:0;
   d[4] = c;
   d[5] = f((uint8_t*)d, (1<<7)/8+4);
   configuration_save(false);
-}
-
-int bcnt(int *tnt){
-  uint32_t (*f)(const uint8_t *d, size_t l) = crc32;
-  uint32_t *d = &g_config[SETT_OTHERS_DATA0];
-  *tnt = d[5] != f((uint8_t*)d, (1<<7)/8+4);
-  return d[4];
 }
 
 
@@ -1082,7 +1082,7 @@ void manual_set_text(char *disp, int len){
 
 		// config done, save
 		if(button_pressed[0] && tm-button_pressed_tm[0]>3000){
-			memcpy(&g_config[SETT_SCROLL_TEXT0], disp, 32);
+			memcpy((uint32_t*)&g_config[SETT_SCROLL_TEXT0], disp, 32);
 			configuration_save(false);
 			return;
 		}
@@ -1116,7 +1116,7 @@ void manual_set_text(char *disp, int len){
 	}
 }
 
-int buffer_text_length(char *buff, int len){
+int buffer_text_length(const char *buff, int len){
 	// find last non blank character
 	for(int i=len-1; i>=0; i--){
 		if(buff[i]!=' ' && buff[i]!=0) return i+1;
@@ -1127,27 +1127,27 @@ int buffer_text_length(char *buff, int len){
 
 void init_display_text(const char *init_text){
 	disp_conf.manual = false;
-	memset(disp_conf.disp_buffer, 0, sizeof(disp_conf.disp_buffer)); // clear the buffer
-	strncpy(disp_conf.screen, "      ", sizeof(disp_conf.screen));
-	strncpy(disp_conf.disp_buffer, init_text, sizeof(disp_conf.disp_buffer));
+	memset((uint8_t*)disp_conf.disp_buffer, 0, sizeof(disp_conf.disp_buffer)); // clear the buffer
+	strncpy((char*)disp_conf.screen, "      ", sizeof(disp_conf.screen));
+	strncpy((char*)disp_conf.disp_buffer, init_text, sizeof(disp_conf.disp_buffer));
 	disp_conf.last_screen_update = 0;
 	disp_conf.txt_pos = 0;
-	disp_conf.txt_len = buffer_text_length(disp_conf.disp_buffer, sizeof(disp_conf.disp_buffer));
+	disp_conf.txt_len = buffer_text_length((const char*)disp_conf.disp_buffer, sizeof(disp_conf.disp_buffer));
 	disp_conf.disp_temp_delay = 0;
 }
 
 void display_text_set(const char* text){
 	if(text!=NULL){
-		strncpy(disp_conf.disp_buffer, text, sizeof(disp_conf.disp_buffer));
+		strncpy((char*)disp_conf.disp_buffer, text, sizeof(disp_conf.disp_buffer));
 	}
 	disp_conf.txt_pos = 0;
-	disp_conf.txt_len = buffer_text_length(disp_conf.disp_buffer, sizeof(disp_conf.disp_buffer));
+	disp_conf.txt_len = buffer_text_length((const char*)disp_conf.disp_buffer, sizeof(disp_conf.disp_buffer));
 	disp_conf.last_screen_update = 0;
 }
 
 void display_text_set_temp(const char* text, uint32_t duration){
 	if(text==NULL) return;
-	strncpy(disp_conf.disp_temp_buffer, text, sizeof(disp_conf.disp_buffer));
+	strncpy((char*)disp_conf.disp_temp_buffer, text, sizeof(disp_conf.disp_buffer));
 	disp_conf.disp_temp_duration = duration;
 	disp_conf.disp_temp_changed = true;
 }
@@ -1298,7 +1298,7 @@ void badge_handle_tag(cycle_return_t *t){
 void handle_conference(){
 	// load the screen text from settings
 	char text[32];
-	memcpy(text, &g_config[SETT_SCROLL_TEXT0], 32);
+	memcpy(text, (uint8_t*)&g_config[SETT_SCROLL_TEXT0], 32);
 
 	init_display_text(text);
 	set_tag_handle_callback(badge_handle_tag);
@@ -1350,7 +1350,7 @@ void handle_conference(){
 				char msg[32];
 				int tn;
 				const int cnt = bcnt(&tn);
-				snprintf(msg, sizeof(msg), "BADGES %d", cnt, tn?'\'':' ');
+				snprintf(msg, sizeof(msg), "BADGES %d %c", cnt, tn?'\'':' ');
 				display_text_set_temp(msg, disp_delay);
 			}
 			else{
@@ -1366,7 +1366,7 @@ void handle_conference(){
 
 		if(button_pressed[0] && tm-button_pressed_tm[0]>3000){
 			display_text_set_external(true);
-			manual_set_text(disp_conf.disp_buffer, sizeof(disp_conf.disp_buffer));
+			manual_set_text((char*)disp_conf.disp_buffer, sizeof(disp_conf.disp_buffer));
 			display_text_set(NULL);
 			set_screen("OK    ");
 
@@ -1516,7 +1516,7 @@ void handle_clock(){
 		const uint32_t tm = HAL_GetTick();
 
 		if(button_pressed[0] && tm-button_pressed_tm[0]>3000){
-			manual_set_clock(&tm_hours, &tm_minutes, &tm_seconds);
+			manual_set_clock((uint8_t*)&tm_hours, (uint8_t*)&tm_minutes, (uint8_t*)&tm_seconds);
 			display_text_set(NULL);
 			set_screen("OK    ");
 
@@ -1594,7 +1594,7 @@ void handle_notifier(){
 				notifier_update = false;
 				old_mode = notifier_mode;
 				// reset text
-				display_text_set(notifier_string);
+				display_text_set((const char*)notifier_string);
 				display_text_set_external(false);
 			}
 			break;
@@ -1633,7 +1633,7 @@ bool handle_notifier_command(uint8_t *buffer){
 	case 's':
 	case 'S':
 		// string command, set current text
-		strncpy(notifier_string, (char*)buffer+1, sizeof(notifier_string));
+		strncpy((char*)notifier_string, (char*)buffer+1, sizeof(notifier_string));
 		notifier_mode = NOTIFIER_MODE_TEXT;
 		notifier_update = true;
 		return true;
@@ -1707,7 +1707,7 @@ void handle_serial_char(char c){
 		if(c=='\n'){
 			// handle buffer
 			comm_buffer[comm_buffer_idx] = '\0';
-			handle_notifier_command(comm_buffer);
+			handle_notifier_command((uint8_t*)comm_buffer);
 			comm_buffer_idx = 0;
 		}
 		else{
@@ -1719,7 +1719,7 @@ void handle_serial_char(char c){
 		}
 	}
 	else{
-		menu_input(c, g_config);
+		menu_input(c, (uint32_t*)g_config);
 	}
 }
 
@@ -1831,7 +1831,7 @@ void handle_hwtest(){
 		nfc_loop();
 		if(hwtest_tag_found){
 			char msg[32];
-			snprintf(msg, sizeof(msg), "%s", (char*)hex2Str(hwtest_tag_uid, hwtest_tag_uid_len));
+			snprintf(msg, sizeof(msg), "%s", (char*)hex2Str((uint8_t*)hwtest_tag_uid, hwtest_tag_uid_len));
 			display_text_set(msg);
 			break;
 		}
@@ -2160,7 +2160,7 @@ volatile char stdout_buffer[256];
 int bprintf(const char *fmt, ...){
 	va_list args;
 	va_start(args, fmt);
-	int len = vsnprintf(stdout_buffer, sizeof(stdout_buffer), fmt, args);
+	int len = vsnprintf((char*)stdout_buffer, sizeof(stdout_buffer), fmt, args);
 	va_end(args);
 
 	// push to buffer
@@ -2179,7 +2179,7 @@ int bprintf(const char *fmt, ...){
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 	if(htim->Instance==TIM6){
 		// periodic screen update
-		display_text_update(&disp_conf);
+		display_text_update((disp_text_t*)&disp_conf);
 		serial_output_flush();
 	}
 }
@@ -2189,8 +2189,8 @@ volatile uint8_t uart_input_buffer[16];
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 	if(huart->Instance == LPUART1){
 		// Code to handle the received data
-		uart_rx_func(uart_input_buffer, 1);
-		HAL_UART_Receive_IT(&hlpuart1, uart_input_buffer, 1);
+		uart_rx_func((uint8_t*)uart_input_buffer, 1);
+		HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)uart_input_buffer, 1);
 	}
 }
 
@@ -2238,7 +2238,7 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim6); // use TIM6 for periodic display update
 
   CDC_SetRxCallback(usb_cdc_rx_func);
-  HAL_UART_Receive_IT(&hlpuart1, uart_input_buffer, 1);
+  HAL_UART_Receive_IT(&hlpuart1, (uint8_t*)uart_input_buffer, 1);
 
   configuration_load();
   g_operation_mode = g_config[SETT_MODE];
@@ -2320,7 +2320,7 @@ int main(void)
 	  bprintf("For serial menu switch to another mode by holding both buttons during powerup.\r\n");
   }
   else {
-	  menu_init(&root, g_config, NULL);
+	  menu_init(&root, (uint32_t*)g_config, NULL);
   }
 
 
