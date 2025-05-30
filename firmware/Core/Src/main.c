@@ -832,6 +832,12 @@ void led_write_register(uint8_t reg, uint8_t data){
   HAL_I2C_Master_Transmit(&hi2c1, LED_ADDR, d, 2, 500);
 }
 
+uint8_t led_read_register(uint8_t reg){
+	uint8_t d;
+	HAL_I2C_Master_Receive(&hi2c1, LED_ADDR, &d, 1, 100);
+	return d;
+}
+
 void matrix_write(const uint8_t *rowcolumn, uint8_t value){
   const uint8_t row = rowcolumn[0];
   const uint8_t column = rowcolumn[1];
@@ -856,16 +862,28 @@ void matrix_clear(){
   }
 }
 
-void matrix_pwm_all(uint8_t bank_a, uint8_t bank_b){
-  for(int i=REG_PAGE_PWM_START; i<=REG_PAGE_PWM_END; i+=16){
-    for(int j=0; j<8; j++){
-      led_write_register(i+j, bank_a);
-    }
-    for(int j=0; j<8; j++){
-      led_write_register(i+8+j, bank_b);
-    }
-  }
+
+uint8_t matrix_get_pwm_a(){
+	return led_read_register(REG_PAGE_PWM_START);
 }
+
+
+void matrix_pwm_all(uint8_t bank_a, uint8_t bank_b){
+	led_select_frame(REG_FRAME_0);
+	uint8_t payload_full[145] = {0};
+	payload_full[0] = REG_PAGE_PWM_START;
+	uint8_t *payload = &(payload_full[1]);
+	for(int i=0; i<144; i+=16){
+		for(int j=0; j<8; j++){
+			payload[i+j] = bank_a;
+		}
+		for(int j=0; j<8; j++){
+			payload[i+8+j] = bank_b;
+		}
+	}
+	HAL_I2C_Master_Transmit(&hi2c1, LED_ADDR, payload_full, 144, 400);
+}
+
 
 void matrix_write_char(int pos, char c){
   uint8_t *p;
@@ -1161,10 +1179,15 @@ void display_text_update(disp_text_t *conf){
 	// set brightness if needed
 	if(conf->brightness!=g_config[SETT_BRIGHTNESS]){
 		conf->brightness = g_config[SETT_BRIGHTNESS];
-		matrix_pwm_all(conf->brightness, conf->brightness>4?conf->brightness/4:1);
+		//bprintf("bset\r\n");
+		const uint8_t b = g_config[SETT_BRIGHTNESS];
+		matrix_pwm_all(b, b>4?b/4:1);
+		return;
 	}
 
-	if(conf->manual) return;  // display is controlled from external source
+	if(conf->manual){
+		return;  // display is controlled from external source
+	}
 
 	// check if temporary text is set
 	if(conf->disp_temp_changed){
@@ -1191,7 +1214,6 @@ void display_text_update(disp_text_t *conf){
 		set_screen("      ");
 		return;
 	}
-
 
 	if(tm-conf->last_screen_update > g_config[SETT_SCROLL_SPEED]){
 		conf->last_screen_update = tm;
@@ -1227,7 +1249,6 @@ void display_text_update(disp_text_t *conf){
 		}
 		set_screen(conf->screen);
 	}
-
 }
 
 void display_text_set_external(bool en){
@@ -1691,6 +1712,16 @@ bool handle_notifier_command(uint8_t *buffer){
 		}
 		const int led_idx = (buffer[1]-'0')*10 + (buffer[2]-'0');
 		notifier_leds[led_idx] = buffer[3]-'0';
+		return true;
+		break;
+	case 'b':
+	case 'B':
+		// Bxxx, 000-100
+		if(buffer[1]<'0' || buffer[1]>'1' || buffer[2]<'0' || buffer[2]>'9' || buffer[3]<'0' || buffer[3]>'9'){
+			return false;
+		}
+		const int b = (buffer[1]-'0')*100 +(buffer[2]-'0')*10 + (buffer[3]-'0');
+		g_config[SETT_BRIGHTNESS] = b;
 		return true;
 		break;
 	}
