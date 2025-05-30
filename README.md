@@ -27,7 +27,7 @@ On the conference site there are nine hidden tags and your quest is to “collec
 
 Just like the last year’s badge which motivated attendants to interact with each other, this year’s badge also has an “interaction counter”. Put the antennas on two badges next to each other for a couple of seconds (it’s best to hold them both upwards and put antennas one over another so both screens could be seen) until both of them show the “NEW BADGE FOUND” text and they will exchange their details, incrementing the badge counter. NOTE: due to the power saving feature this might need to be repeated multiple times.
 
-![How to hold badges for data exchange](images/data.jpg)
+![How to hold badges for data exchange](images/dataex.jpg)
 
 To check the current status of both quests press the BTN2 once or twice.
 
@@ -37,11 +37,11 @@ Note: in order to preserve the battery life, the NFC reader is in power save mod
 
 I’m glad you asked. Yes, there are other modes on the badge:
 
-    Conference mode scrolling text with quests)
-    Clock (not really precise, needs configuration)
-    Notifier (“passthrough” mode allowing you to set the screen over USB so it can be used as a desktop notifier)
-    Game (a game!)
-    Test (hardware test used during production)
+- Conference mode scrolling text with quests)
+- Clock (not really precise, needs configuration)
+- Notifier (“passthrough” mode allowing you to set the screen over USB so it can be used as a desktop notifier)
+- Game (a game!)
+- Test (hardware test used during production)
 
 To change the mode press and hold both buttons while powering on the badge. After a couple of seconds MODE will appear on screen. Use buttons to select the mode you like to try and press and hold both buttons for three to five seconds to confirm the selection.
 
