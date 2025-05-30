@@ -1,6 +1,8 @@
 # DORS/CLUC Conference badge 2025
 
-More info at: [https://www.dorscluc.org/badge](https://www.dorscluc.org/badge/)
+Conference page with badge instructions: [https://www.dorscluc.org/badge](https://www.dorscluc.org/badge/)
+
+Build log: [https://hyperglitch.com/articles/dc2025-badge](https://hyperglitch.com/articles/dc2025-badge)
 
 
 - `/hardware` - KiCad files for the badge
