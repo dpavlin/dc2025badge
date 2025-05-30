@@ -2,6 +2,13 @@
 
 More info at: [https://www.dorscluc.org/badge](https://www.dorscluc.org/badge/)
 
+
+- `/hardware` - KiCad files for the badge
+- `/firmware` - firmware for the badge
+- `/3D` - 3D models for the stand, tag and programming jig
+- `/notification_handler.py` - Python script for displaying the notifications and clock on the badge (in notifier mode)
+
+
 ----------------------------------------
 
 
