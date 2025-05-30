@@ -2,4 +2,6 @@ hardware/3D
 hardware/dc2025_badge-backups
 hardware/#auto_saved_files#
 hardware/~*
+firmware/Debug
+firmware/Release
 
