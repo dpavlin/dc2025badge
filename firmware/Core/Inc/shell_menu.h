@@ -1,8 +1,7 @@
 /*
- * shell_menu.h
+ * SPDX-FileCopyrightText: 2025 Igor Brkic <igor@hyperglitch.com>
  *
- *  Created on: May 17, 2025
- *      Author: i
+ * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
 #ifndef INC_SHELL_MENU_H_
