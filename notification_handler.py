@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import argparse
 import queue
 import subprocess
@@ -9,6 +11,14 @@ import time
 
 def badge_thread(q, time_to_die, port):
     # TODO: read badge output and react to buttons and nfc tags
+
+    brightness_low = b'B05\r\n'
+    brightness_high = b'B20\r\n'
+
+    s = serial.Serial(port, 115200)
+    s.write(brightness_low)
+    s.write(b'C\r\n')    # Clear screen
+    s.write(b'S\r\n')
     while True:
         if time_to_die.is_set():
             break
@@ -17,6 +27,8 @@ def badge_thread(q, time_to_die, port):
             print(f"\n[Notification]\nApp: {data['app_name']}\nTitle: {data['summary']}\nBody: {data['body']}\n")
 
             s = serial.Serial(port, 115200)
+            s.write(brightness_high)
+            time.sleep(0.5)
             s.write(b'C\r\n')    # Clear screen
             for i in range(39):
                 s.write(b'L%02d1\r\n' % i)    # light up leds
@@ -27,11 +39,12 @@ def badge_thread(q, time_to_die, port):
                 s.write(b'L%02d0\r\n' % i)    # light up leds
                 time.sleep(0.02)
             s.write(b'C\r\n')    # Clear screen
+            time.sleep(0.5)
         except queue.Empty:
             # display time
             s = serial.Serial(port, 115200)
-            s.write(b'C\r\n')    # Clear screen
             s.write(time.strftime("S %02H%02M \r\n").encode())    # Show time
+            s.write(brightness_low)
 
 
 def main():

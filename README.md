@@ -66,6 +66,7 @@ When in notifier mode the serial terminal isn’t used for configuration but for
 - `G<char_idx><segment_idx><1|0>` will control a specified character segment. `<char_idx>` is character index (0-5), `<segment_idx>` is the index of the segment (0-8) and `1|0` controls whether to turn the segment on or off. For example “`G161`” will turn on the middle horizontal segment on second character.
 - `L<led_idx><1|0>` will turn the specified LED in the logo on or off. `<led_idx>` is in the range 00-39 (with leading zero). For example “`L021`” will turn on the led with index 2.
 - `C` will clear the screen and LED matrix.
+- `B<brightness>` will set the brightness where the `<brightness>` is in the rangge 00-99 (with leading zero). For example “`B05`” will set the brightness to 5%.
 
 
 ## License

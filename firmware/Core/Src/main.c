@@ -1599,6 +1599,7 @@ typedef enum{
 
 volatile notifier_mode_t notifier_mode = NOTIFIER_MODE_TEXT;
 volatile uint8_t notifier_leds[39] = {0};
+volatile bool notifier_leds_changed = true;
 volatile char notifier_string[32] = "";
 volatile uint8_t notifier_segments[6][9] = {0};
 volatile bool notifier_update = false;
@@ -1634,12 +1635,15 @@ void handle_notifier(){
 		}
 
 		// handle leds
-		for(int i=0; i<39; i++){
-			matrix_write(logo_matrix[i], notifier_leds[i]);
+		if(notifier_leds_changed || notifier_update){
+			notifier_leds_changed = false;
+			for(int i=0; i<39; i++){
+				matrix_write(logo_matrix[i], notifier_leds[i]);
+			}
+			matrix_update();
 		}
-		matrix_update();
-		nfc_loop();
 
+		nfc_loop();
 	}
 }
 
@@ -1712,15 +1716,16 @@ bool handle_notifier_command(uint8_t *buffer){
 		}
 		const int led_idx = (buffer[1]-'0')*10 + (buffer[2]-'0');
 		notifier_leds[led_idx] = buffer[3]-'0';
+		notifier_leds_changed = true;
 		return true;
 		break;
 	case 'b':
 	case 'B':
 		// Bxxx, 000-100
-		if(buffer[1]<'0' || buffer[1]>'1' || buffer[2]<'0' || buffer[2]>'9' || buffer[3]<'0' || buffer[3]>'9'){
+		if(buffer[1]<'0' || buffer[1]>'9' || buffer[2]<'0' || buffer[2]>'9'){
 			return false;
 		}
-		const int b = (buffer[1]-'0')*100 +(buffer[2]-'0')*10 + (buffer[3]-'0');
+		const int b = (buffer[1]-'0')*10 + (buffer[2]-'0');
 		g_config[SETT_BRIGHTNESS] = b;
 		return true;
 		break;
