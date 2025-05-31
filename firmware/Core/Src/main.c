@@ -1635,7 +1635,7 @@ void handle_notifier(){
 		}
 
 		// handle leds
-		if(notifier_leds_changed || notifier_update){
+		if(notifier_leds_changed){
 			notifier_leds_changed = false;
 			for(int i=0; i<39; i++){
 				matrix_write(logo_matrix[i], notifier_leds[i]);
@@ -1688,6 +1688,7 @@ bool handle_notifier_command(uint8_t *buffer){
 			for(int i=0; i<39; i++){
 				notifier_leds[i] = 0;
 			}
+			notifier_leds_changed = true;
 		}
 		notifier_update = true;
 		return true;
