@@ -115,30 +115,72 @@ def display_manager_thread_func():
     send_to_badge("C") # Initial clear
 
     logger.info("Display manager thread started.")
+    next_time_update_epoch = time.monotonic() # Use monotonic clock for measuring intervals
+    last_displayed_content_on_badge_was_custom_text = False
+
     while not time_to_die_event.is_set():
-        current_time_epoch = time.time()
+        loop_start_time = time.monotonic() # For measuring this loop's execution time
+        current_wall_time_epoch = time.time() # For getting actual HHMMSS
         display_time_now = False
 
         with display_mode_lock:
             if is_showing_custom_text:
-                if current_time_epoch >= custom_text_end_time:
+                if current_wall_time_epoch >= custom_text_end_time:
                     is_showing_custom_text = False
-                    display_time_now = True
+                    display_time_now = True # Switch to time because custom text ended
                     logger.info("Custom text duration ended. Switching to time display.")
+                    # Force next_time_update_epoch to be now so time displays immediately
+                    next_time_update_epoch = loop_start_time
+                    last_displayed_content_on_badge_was_custom_text = True
             else: # Not showing custom text, so should show time
                 display_time_now = True
 
-        if display_time_now:
-            # UPDATED TIME FORMAT to HHMMSS (6 characters, fits perfectly)
-            time_str_for_badge = time.strftime("%H%M%S")
+        if display_time_now and loop_start_time >= next_time_update_epoch:
+            time_str_for_badge = time.strftime("%H%M%S", time.localtime(current_wall_time_epoch))
             
-            # Only update if different from last content or if switched from custom text
-            if time_str_for_badge != last_displayed_content_on_badge or not is_showing_custom_text:
+            # Determine if an update to the badge is needed
+            update_badge_display = False
+            if not is_showing_custom_text and last_displayed_content_on_badge_was_custom_text:
+                # This flag would be set when custom text ends
+                update_badge_display = True
+                last_displayed_content_on_badge_was_custom_text = False # Reset flag
+            elif time_str_for_badge != last_displayed_content_on_badge:
+                update_badge_display = True
+
+            if update_badge_display:
                 logger.debug(f"Displaying time: {time_str_for_badge}")
                 if send_to_badge(f"S{time_str_for_badge}"):
                     last_displayed_content_on_badge = time_str_for_badge
+            
+            # Schedule the next time update precisely TIME_UPDATE_INTERVAL_SECONDS from the last scheduled one
+            next_time_update_epoch += TIME_UPDATE_INTERVAL_SECONDS
+            # If we've fallen behind (e.g., due to a long custom text display), catch up.
+            # But don't schedule in the past.
+            if next_time_update_epoch < loop_start_time:
+                 next_time_update_epoch = loop_start_time + TIME_UPDATE_INTERVAL_SECONDS
 
-        time.sleep(TIME_UPDATE_INTERVAL_SECONDS) # Control update frequency
+        # Calculate how long this iteration took
+        loop_duration = time.monotonic() - loop_start_time
+        
+        # Calculate sleep time to align with the next second (or next interval for time display)
+        time_to_next_event = 0
+        if is_showing_custom_text:
+            # If showing custom text, sleep until it's time to check its end or a short poll interval
+            time_to_next_event = max(0, custom_text_end_time - current_wall_time_epoch)
+            # Ensure we don't sleep too long if custom_text_end_time is far away,
+            # and still poll reasonably often. Min sleep of a short poll interval.
+            sleep_duration = min(time_to_next_event, 0.1) # e.g., check every 100ms
+        else:
+            # If showing time, calculate sleep to hit the next `next_time_update_epoch`
+            time_to_next_event = max(0, next_time_update_epoch - time.monotonic())
+            sleep_duration = time_to_next_event
+
+        # Ensure minimum sleep to prevent busy-looping if calculations are off or events are very frequent
+        sleep_duration = max(0.01, sleep_duration) # Sleep at least 10ms
+
+        if not time_to_die_event.is_set(): # Check again before sleeping
+            time.sleep(sleep_duration)
+
     logger.info("Display manager thread stopped.")
 
 # --- MQTT Callback Functions ---
