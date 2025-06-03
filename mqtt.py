@@ -9,7 +9,7 @@ import importlib.metadata # For version checking if needed later
 
 # --- Configuration ---
 BADGE_SERIAL_PORT = "/dev/ttyACM0"  # <<< CHANGE THIS if your port is different
-MQTT_BROKER = "rpi2" # <<< CHANGE THIS
+MQTT_BROKER = "rpi2" # <<< UPDATED BROKER IP/HOSTNAME
 MQTT_PORT = 1883
 MQTT_USER = "your_mqtt_user"          # <<< CHANGE OR REMOVE if no auth
 MQTT_PASSWORD = "your_mqtt_password"  # <<< CHANGE OR REMOVE if no auth
@@ -18,12 +18,12 @@ MQTT_KEEPALIVE = 60 # Seconds for MQTT keepalive
 DEVICE_NAME = "DORS/CLUC Badge Notifier"
 DEVICE_MANUFACTURER = "Hyperglitch Ltd / DORS/CLUC"
 DEVICE_MODEL = "DC2025 Badge"
-DEVICE_SW_VERSION = "mqtt_bridge_v1.2" # Bridge script version
+DEVICE_SW_VERSION = "mqtt_bridge_v1.3" # Bridge script version (incremented)
 
 # Unique ID for the device (important for HA)
 DEVICE_UNIQUE_ID = "dc2025_badge_notifier_01" # Ensure unique if multiple badges
-BASE_TOPIC_PREFIX = "badge_notifier" # Prefix for specific command/state topics
-DEVICE_BASE_TOPIC = f"{BASE_TOPIC_PREFIX}/{DEVICE_UNIQUE_ID}"
+BASE_TOPIC_PREFIX = "badge_notifier" # Prefix for specific command/state topics for this badge
+DEVICE_BASE_TOPIC = f"{BASE_TOPIC_PREFIX}/{DEVICE_UNIQUE_ID}" # e.g., badge_notifier/dc2025_badge_notifier_01
 
 # MQTT Discovery Prefix (usually "homeassistant")
 DISCOVERY_PREFIX = "homeassistant"
@@ -129,20 +129,14 @@ def display_manager_thread_func():
                 display_time_now = True
 
         if display_time_now:
-            # Badge uses HHMM format without colon for 6 char display
-            time_str_for_badge = time.strftime("%H%M") # e.g., "1458"
+            # UPDATED TIME FORMAT to HHMMSS (6 characters, fits perfectly)
+            time_str_for_badge = time.strftime("%H%M%S")
             
-            # Construct the full string for the badge (e.g., " 1458 ")
-            # This centers HHMM on a 6-char display
-            badge_time_display = f" {time_str_for_badge} " 
-
             # Only update if different from last content or if switched from custom text
-            if badge_time_display != last_displayed_content_on_badge or not is_showing_custom_text:
-                logger.debug(f"Displaying time: {badge_time_display}")
-                if send_to_badge(f"S{badge_time_display}"):
-                    last_displayed_content_on_badge = badge_time_display
-                # Consider if brightness should revert to a default for time display
-                # For now, it uses the last set brightness.
+            if time_str_for_badge != last_displayed_content_on_badge or not is_showing_custom_text:
+                logger.debug(f"Displaying time: {time_str_for_badge}")
+                if send_to_badge(f"S{time_str_for_badge}"):
+                    last_displayed_content_on_badge = time_str_for_badge
 
         time.sleep(TIME_UPDATE_INTERVAL_SECONDS) # Control update frequency
     logger.info("Display manager thread stopped.")
@@ -153,7 +147,7 @@ def on_connect(client, userdata, flags, rc, properties=None):
         logger.info("Connected to MQTT Broker!")
         client.publish(f"{DEVICE_BASE_TOPIC}/status", "online", retain=True, qos=1)
         publish_discovery_messages(client)
-        set_initial_badge_and_mqtt_states(client)
+        set_initial_badge_and_mqtt_states(client) # Publish initial states
 
         # Subscribe to command topics
         client.subscribe(f"{DEVICE_BASE_TOPIC}/text_display/set")
@@ -205,17 +199,14 @@ def on_message(client, userdata, msg):
 
     elif entity_topic == "clear_button/press" and payload_str.upper() == "PRESS":
         if send_to_badge("C"):
-            with display_mode_lock:
+            with display_mode_lock: # Clear current text display state
                 is_showing_custom_text = False
                 custom_text_end_time = 0 # Stop any custom text display
                 last_displayed_content_on_badge = "" # Force time update next cycle
             client.publish(f"{DEVICE_BASE_TOPIC}/text_display/state", "", retain=True, qos=1)
-            # Also turn off logo alert light state in HA
-            # The 'C' command on badge clears LEDs too.
             client.publish(f"{DEVICE_BASE_TOPIC}/logo_alert_light/state", "OFF", retain=True, qos=1)
 
     elif entity_topic == "logo_alert_light/set":
-        # This light controls all logo LEDs together as an example
         all_leds_set_successfully = True
         target_state_str = "OFF"
         if payload_str.upper() == "ON":
@@ -238,22 +229,19 @@ def publish_discovery_messages(client):
         "sw_version": DEVICE_SW_VERSION,
         "configuration_url": "http://hyperglitch.com/articles/dc2025-badge" # Example
     }
-    # Common payload parts for most entities
     common_entity_payload = {
         "device": device_info, "optimistic": False, "retain": True, "qos":1,
         "availability_topic": f"{DEVICE_BASE_TOPIC}/status",
         "payload_available": "online", "payload_not_available": "offline"
     }
 
-    # 1. Text Entity
     text_cfg_topic = f"{DISCOVERY_PREFIX}/text/{DEVICE_UNIQUE_ID}/badge_display_text/config"
     text_payload = {**common_entity_payload, "name": "Badge Text", "unique_id": f"{DEVICE_UNIQUE_ID}_text",
                     "state_topic": f"{DEVICE_BASE_TOPIC}/text_display/state",
                     "command_topic": f"{DEVICE_BASE_TOPIC}/text_display/set",
-                    "min": 0, "max": 30, "pattern": "^[ -~]*$"} # Allow printable ASCII, empty string
+                    "min": 0, "max": 30, "pattern": "^[ -~]*$"}
     client.publish(text_cfg_topic, json.dumps(text_payload), retain=True, qos=1)
 
-    # 2. Brightness Number Entity
     bright_cfg_topic = f"{DISCOVERY_PREFIX}/number/{DEVICE_UNIQUE_ID}/badge_brightness/config"
     bright_payload = {**common_entity_payload, "name": "Badge Brightness", "unique_id": f"{DEVICE_UNIQUE_ID}_brightness",
                       "state_topic": f"{DEVICE_BASE_TOPIC}/brightness/state",
@@ -261,17 +249,14 @@ def publish_discovery_messages(client):
                       "min": 0, "max": 99, "step": 1, "unit_of_measurement": "%", "mode": "slider"}
     client.publish(bright_cfg_topic, json.dumps(bright_payload), retain=True, qos=1)
 
-    # 3. Fade Button
     fade_btn_cfg_topic = f"{DISCOVERY_PREFIX}/button/{DEVICE_UNIQUE_ID}/badge_trigger_fade/config"
-    # Buttons don't have state, so no state_topic or optimistic flag typically needed for command button
     fade_btn_payload = {"name": "Badge Fade", "unique_id": f"{DEVICE_UNIQUE_ID}_fade",
                         "command_topic": f"{DEVICE_BASE_TOPIC}/fade_button/press",
-                        "device": device_info, "retain": False, "qos":0, # Commands usually qos 0, no retain
+                        "device": device_info, "retain": False, "qos":0,
                         "availability_topic": f"{DEVICE_BASE_TOPIC}/status",
                         "payload_available": "online", "payload_not_available": "offline"}
-    client.publish(fade_btn_cfg_topic, json.dumps(fade_btn_payload), retain=True, qos=1) # Config itself is retained
+    client.publish(fade_btn_cfg_topic, json.dumps(fade_btn_payload), retain=True, qos=1)
 
-    # 4. Clear Button
     clear_btn_cfg_topic = f"{DISCOVERY_PREFIX}/button/{DEVICE_UNIQUE_ID}/badge_clear_display/config"
     clear_btn_payload = {"name": "Badge Clear", "unique_id": f"{DEVICE_UNIQUE_ID}_clear",
                          "command_topic": f"{DEVICE_BASE_TOPIC}/clear_button/press",
@@ -280,10 +265,9 @@ def publish_discovery_messages(client):
                          "payload_available": "online", "payload_not_available": "offline"}
     client.publish(clear_btn_cfg_topic, json.dumps(clear_btn_payload), retain=True, qos=1)
 
-    # 5. Logo Alert Light (simple on/off for all logo LEDs)
     logo_light_cfg_topic = f"{DISCOVERY_PREFIX}/light/{DEVICE_UNIQUE_ID}/badge_logo_alert/config"
     logo_light_payload = {**common_entity_payload, "name": "Badge Logo Alert", "unique_id": f"{DEVICE_UNIQUE_ID}_logo_light",
-                          "schema": "basic", # Indicates simple on/off
+                          "schema": "basic", 
                           "state_topic": f"{DEVICE_BASE_TOPIC}/logo_alert_light/state",
                           "command_topic": f"{DEVICE_BASE_TOPIC}/logo_alert_light/set",
                           "payload_on": "ON", "payload_off": "OFF"}
@@ -299,9 +283,9 @@ def set_initial_badge_and_mqtt_states(client):
     if send_to_badge(f"B{current_badge_brightness:02}"):
         client.publish(f"{DEVICE_BASE_TOPIC}/brightness/state", str(current_badge_brightness), retain=True, qos=1)
     
-    if send_to_badge("C"): # Clear physical badge display
-        last_displayed_content_on_badge = "" # Internal state for display manager
-        client.publish(f"{DEVICE_BASE_TOPIC}/text_display/state", "", retain=True, qos=1) # Clear HA text state
+    if send_to_badge("C"):
+        last_displayed_content_on_badge = "" 
+        client.publish(f"{DEVICE_BASE_TOPIC}/text_display/state", "", retain=True, qos=1)
     
     all_logo_off_success = True
     for i in range(39):
@@ -311,9 +295,8 @@ def set_initial_badge_and_mqtt_states(client):
 
 # --- Main Script Execution ---
 def main_mqtt_loop():
-    global mqtt_client_global # Allow access for shutdown
+    global mqtt_client_global 
 
-    # Start the display manager thread
     display_thread = threading.Thread(target=display_manager_thread_func, daemon=True)
     display_thread.start()
 
@@ -321,7 +304,7 @@ def main_mqtt_loop():
     if MQTT_USER and MQTT_PASSWORD:
         mqtt_client_global.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     
-    mqtt_client_global.will_set(f"{DEVICE_BASE_TOPIC}/status", payload="offline", qos=1, retain=True) # LWT
+    mqtt_client_global.will_set(f"{DEVICE_BASE_TOPIC}/status", payload="offline", qos=1, retain=True)
     
     mqtt_client_global.on_connect = on_connect
     mqtt_client_global.on_disconnect = on_disconnect
@@ -331,12 +314,13 @@ def main_mqtt_loop():
         try:
             if not mqtt_client_global.is_connected():
                 logger.info(f"Attempting to connect to MQTT broker: {MQTT_BROKER}...")
+                # Add a timeout to the connect call
                 mqtt_client_global.connect(MQTT_BROKER, MQTT_PORT, MQTT_KEEPALIVE)
-                mqtt_client_global.loop_start() # Start network loop in background thread
-            time.sleep(5) # Keep main thread alive, check connection status periodically
+                mqtt_client_global.loop_start()
+            time.sleep(5) 
         except ConnectionRefusedError:
             logger.error("MQTT connection refused. Retrying in 10 seconds...")
-            if mqtt_client_global.is_connected(): mqtt_client_global.loop_stop() # Stop loop if connect failed
+            if mqtt_client_global.is_connected(): mqtt_client_global.loop_stop()
             time.sleep(10)
         except Exception as e:
             logger.error(f"MQTT or other main loop error: {e}. Retrying in 10 seconds...")
@@ -350,7 +334,7 @@ if __name__ == "__main__":
         logger.info("Keyboard interrupt received. Shutting down...")
     finally:
         logger.info("Initiating shutdown sequence...")
-        time_to_die_event.set() # Signal all threads to terminate
+        time_to_die_event.set() 
 
         logger.info("Cleaning up MQTT...")
         if mqtt_client_global:
@@ -370,14 +354,13 @@ if __name__ == "__main__":
                     logger.info("Disconnected from MQTT broker.")
                 except Exception as e:
                     logger.error(f"Error disconnecting from MQTT broker: {e}")
-            else: # Not connected, but try to stop loop just in case
+            else:
                  try: mqtt_client_global.loop_stop()
                  except: pass
         
-        logger.info("Waiting for display manager thread to join...")
-        # display_thread is not joined here because it's a daemon and will exit with main.
-        # If it were a non-daemon, you'd call display_thread.join(timeout=2)
-        
+        # Wait for display manager thread to finish its current iteration if it's crucial
+        # display_thread.join(timeout=2) # This was not defined in main's scope
+
         logger.info("Cleaning up serial port...")
         with serial_lock:
             if ser and ser.is_open:
@@ -385,7 +368,7 @@ if __name__ == "__main__":
                     send_to_badge(f"B{DEFAULT_BADGE_BRIGHTNESS:02}", max_retries=0)
                     send_to_badge("C", max_retries=0)
                     send_to_badge("SBye...", max_retries=0)
-                    time.sleep(0.2) # Give badge time for last commands
+                    time.sleep(0.2) 
                     ser.close()
                     logger.info("Serial port closed.")
                 except Exception as e:
