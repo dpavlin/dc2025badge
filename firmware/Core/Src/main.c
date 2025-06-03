@@ -1705,6 +1705,8 @@ bool handle_notifier_command(uint8_t *buffer){
 			const int pos = buffer[1]-'0';
 			const int seg = buffer[2]-'0';
 			notifier_segments[pos][seg] = buffer[3]-'0';
+			notifier_leds_changed = true;
+			notifier_update = true;
 			return true;
 		}
 		break;
