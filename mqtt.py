@@ -5,457 +5,409 @@ import time
 import json
 import threading
 import logging
-import importlib.metadata # For version checking if needed later
-import signal # Add signal handling
+import signal # For graceful shutdown
 
-# --- Configuration ---
-BADGE_SERIAL_PORT = "/dev/ttyACM0"  # <<< CHANGE THIS if your port is different
-MQTT_BROKER = "rpi2" # <<< UPDATED BROKER IP/HOSTNAME
-MQTT_PORT = 1883
-MQTT_USER = "your_mqtt_user"          # <<< CHANGE OR REMOVE if no auth
-MQTT_PASSWORD = "your_mqtt_password"  # <<< CHANGE OR REMOVE if no auth
-MQTT_KEEPALIVE = 60 # Seconds for MQTT keepalive
+# --- CONFIGURATION ---
+BADGE_SERIAL_PORT = "/dev/ttyACM0"      # <<<--- CHANGE THIS if your port is different
+MQTT_BROKER_HOST = "rpi2"             # <<<--- CHANGE THIS to your MQTT broker IP/hostname
+MQTT_BROKER_PORT = 1883
+MQTT_USER = None                      # <<<--- SET YOUR MQTT USER if auth is needed, else None
+MQTT_PASSWORD = None                  # <<<--- SET YOUR MQTT PASSWORD if auth is needed, else None
+MQTT_KEEPALIVE_INTERVAL = 60          # Seconds for MQTT keepalive
 
-DEVICE_NAME = "DORS/CLUC Badge Notifier"
+# Device specific identifiers for MQTT Discovery
+DEVICE_NAME_FRIENDLY = "DORS/CLUC Badge Notifier"
 DEVICE_MANUFACTURER = "Hyperglitch Ltd / DORS/CLUC"
-DEVICE_MODEL = "DC2025 Badge"
-DEVICE_SW_VERSION = "mqtt_bridge_v1.3" # Bridge script version (incremented)
+DEVICE_MODEL_NAME = "DC2025 Badge"
+BRIDGE_SCRIPT_VERSION = "mqtt_bridge_v1.4"
+DEVICE_UNIQUE_ID = "dc2025_badge_notifier_01" # MUST be unique for each badge/bridge instance
 
-# Unique ID for the device (important for HA)
-DEVICE_UNIQUE_ID = "dc2025_badge_notifier_01" # Ensure unique if multiple badges
-BASE_TOPIC_PREFIX = "badge_notifier" # Prefix for specific command/state topics for this badge
-DEVICE_BASE_TOPIC = f"{BASE_TOPIC_PREFIX}/{DEVICE_UNIQUE_ID}" # e.g., badge_notifier/dc2025_badge_notifier_01
+# MQTT Topic Structure
+BASE_TOPIC_PREFIX = "badgenotifier" # Keeps topics tidy, e.g., badgenotifier/dc2025_badge_01/...
+DEVICE_BASE_TOPIC = f"{BASE_TOPIC_PREFIX}/{DEVICE_UNIQUE_ID}"
+AVAILABILITY_TOPIC = f"{DEVICE_BASE_TOPIC}/status"
+DISCOVERY_PREFIX = "homeassistant"    # Standard HA discovery prefix
 
-# MQTT Discovery Prefix (usually "homeassistant")
-DISCOVERY_PREFIX = "homeassistant"
+# Badge & Display Behavior
+DEFAULT_BADGE_BRIGHTNESS = 20         # 0-99 (as per badge firmware Bxx command)
+TEXT_MSG_MIN_DURATION_S = 3
+TEXT_MSG_CHARS_PER_SEC = 5            # For extending display time based on text length
+TIME_DISPLAY_UPDATE_INTERVAL_S = 1    # How often to update time on badge when idle
+SERIAL_RECONNECT_DELAY_S = 5
+MQTT_RECONNECT_DELAY_S = 10
 
-# Default states and display behavior
-DEFAULT_BADGE_BRIGHTNESS = 20 # 0-99 (as per badge firmware Bxx command)
-TEXT_DISPLAY_MIN_DURATION_SECONDS = 3
-CHARS_PER_SECOND_ESTIMATE = 5 # For extending display time based on text length
-TIME_UPDATE_INTERVAL_SECONDS = 1 # How often to update time on badge when idle
-
-# --- Logging ---
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# --- Logging Setup ---
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger("BadgeMQTTBridge")
 
-# --- Global Variables ---
-ser = None
-serial_lock = threading.Lock() # For thread-safe access to serial port
-mqtt_client_global = None # To allow access from signal handler
-time_to_die_event = threading.Event() # For signaling threads to stop
-display_thread_global = None # Make display thread accessible globally
+# --- Global Variables & Threading Primitives ---
+serial_port_instance = None
+serial_port_lock = threading.Lock()
+mqtt_client_instance = None
+shutdown_event = threading.Event() # Used to signal all threads to terminate
 
-# State management for display (text vs. time)
-display_mode_lock = threading.Lock()
-is_showing_custom_text = False
-custom_text_end_time = 0
-last_displayed_content_on_badge = "" # Tracks what was last sent as "S..."
-current_badge_brightness = DEFAULT_BADGE_BRIGHTNESS # Assumed initial, updated by commands
+# Display state management (protected by display_state_lock)
+display_state_lock = threading.Lock()
+is_displaying_custom_message = False
+custom_message_expiry_time = 0 # time.monotonic() value
+last_content_sent_to_badge = ""  # To avoid redundant 'S' commands
+current_badge_brightness_sw_copy = DEFAULT_BADGE_BRIGHTNESS # Software's belief of badge brightness
 
-# --- Signal Handler ---
-def signal_handler(sig, frame):
-    logger.info(f"Signal {sig} received. Setting time_to_die_event.")
-    time_to_die_event.set()
 
-# --- Badge Serial Communication ---
-def connect_serial_port():
-    global ser
-    if ser and ser.is_open:
+# --- Serial Communication Functions ---
+def connect_to_serial_port():
+    global serial_port_instance
+    if serial_port_instance and serial_port_instance.is_open:
         return True
     try:
-        logger.info(f"Attempting to connect to badge on {BADGE_SERIAL_PORT}...")
-        ser = serial.Serial(BADGE_SERIAL_PORT, 115200, timeout=1, write_timeout=1)
-        time.sleep(0.2)  # Allow port to open
+        logger.info(f"Attempting to connect to badge via serial: {BADGE_SERIAL_PORT}")
+        serial_port_instance = serial.Serial(BADGE_SERIAL_PORT, 115200, timeout=1, write_timeout=1)
+        time.sleep(0.2) # Allow port to open and device to settle
         logger.info(f"Successfully connected to badge on {BADGE_SERIAL_PORT}")
         return True
     except serial.SerialException as e:
         logger.error(f"Serial connection error: {e}")
-        ser = None
+        serial_port_instance = None
         return False
     except Exception as e:
-        logger.error(f"Unexpected error connecting to serial: {e}")
-        ser = None
+        logger.error(f"Unexpected error connecting to serial port: {e}")
+        serial_port_instance = None
         return False
 
-def send_to_badge(command_str, max_retries=1):
-    global ser
-    if not command_str.endswith('\r\n'):
-        command_str += '\r\n'
+def send_command_to_badge(command_string, max_retries=1):
+    global serial_port_instance
+    if not command_string.endswith('\r\n'):
+        command_string += '\r\n'
 
-    with serial_lock:
+    with serial_port_lock:
         for attempt in range(max_retries + 1):
-            if ser is None or not ser.is_open:
-                if not connect_serial_port():
+            if not serial_port_instance or not serial_port_instance.is_open:
+                if not connect_to_serial_port():
                     if attempt < max_retries:
-                        logger.warning("Badge not connected, retrying send...")
-                        time.sleep(1)
+                        logger.warning(f"Badge not connected. Retrying send for '{command_string.strip()}'...")
+                        time.sleep(SERIAL_RECONNECT_DELAY_S)
                         continue
                     else:
-                        logger.error("Badge not connected, command failed after serial retries.")
+                        logger.error(f"Command '{command_string.strip()}' failed: Badge not connected after retries.")
                         return False
             try:
-                logger.info(f"Sending to badge: {command_str.strip()}")
-                ser.write(command_str.encode('utf-8'))
-                time.sleep(0.05) # Give badge a moment
+                logger.info(f"Sending to badge: {command_string.strip()}")
+                serial_port_instance.write(command_string.encode('utf-8'))
+                time.sleep(0.05) # Brief pause for badge to process
                 return True
             except serial.SerialTimeoutException:
-                logger.error(f"Serial write timeout writing to badge (attempt {attempt+1}).")
+                logger.error(f"Serial write timeout for command: {command_string.strip()} (attempt {attempt + 1})")
             except Exception as e:
-                logger.error(f"Error writing to badge (attempt {attempt+1}): {e}")
+                logger.error(f"Error writing to badge for command {command_string.strip()} (attempt {attempt + 1}): {e}")
             
-            if ser: # If an error occurred, close and nullify to force reconnect
-                try: ser.close()
+            # If error, close port to force reconnect on next attempt/call
+            if serial_port_instance:
+                try: serial_port_instance.close()
                 except: pass
-            ser = None
-            if attempt < max_retries: time.sleep(0.5)
-            else: logger.error("Command failed after retries due to write error.")
+            serial_port_instance = None # Nullify to trigger reconnect
+            if attempt < max_retries: time.sleep(0.5) # Wait before retry
+            else: logger.error(f"Command '{command_string.strip()}' failed after retries due to write error.")
         return False
 
 # --- Display Management Thread ---
-def display_manager_thread_func():
-    global is_showing_custom_text, custom_text_end_time, last_displayed_content_on_badge, current_badge_brightness
-    
-    # Set initial brightness on badge when this thread starts
-    send_to_badge(f"B{current_badge_brightness:02}")
-    send_to_badge("C") # Initial clear
-
+def display_manager_thread():
+    global is_displaying_custom_message, custom_message_expiry_time, last_content_sent_to_badge
     logger.info("Display manager thread started.")
-    next_time_update_epoch = time.monotonic() # Use monotonic clock for measuring intervals
-    last_displayed_content_on_badge_was_custom_text = False
 
-    while not time_to_die_event.is_set():
-        loop_start_time = time.monotonic() # For measuring this loop's execution time
-        current_wall_time_epoch = time.time() # For getting actual HHMMSS
-        display_time_now = False
+    # Initial setup commands sent once after serial port is confirmed open by first send_command_to_badge call
+    # This is now handled by set_initial_badge_and_mqtt_states called via on_connect
 
-        with display_mode_lock:
-            if is_showing_custom_text:
-                if current_wall_time_epoch >= custom_text_end_time:
-                    is_showing_custom_text = False
-                    display_time_now = True # Switch to time because custom text ended
-                    logger.info("Custom text duration ended. Switching to time display.")
-                    # Force next_time_update_epoch to be now so time displays immediately
-                    next_time_update_epoch = loop_start_time
-                    last_displayed_content_on_badge_was_custom_text = True
-            else: # Not showing custom text, so should show time
-                display_time_now = True
+    while not shutdown_event.is_set():
+        current_monotonic_time = time.monotonic()
+        should_display_time = False
 
-        if display_time_now and loop_start_time >= next_time_update_epoch:
-            time_str_for_badge = time.strftime("%H%M%S", time.localtime(current_wall_time_epoch))
-            
-            # Determine if an update to the badge is needed
-            update_badge_display = False
-            if not is_showing_custom_text and last_displayed_content_on_badge_was_custom_text:
-                # This flag would be set when custom text ends
-                update_badge_display = True
-                last_displayed_content_on_badge_was_custom_text = False # Reset flag
-            elif time_str_for_badge != last_displayed_content_on_badge:
-                update_badge_display = True
+        with display_state_lock:
+            if is_displaying_custom_message:
+                if current_monotonic_time >= custom_message_expiry_time:
+                    is_displaying_custom_message = False
+                    should_display_time = True # Custom message duration ended
+                    logger.info("Custom message duration expired. Switching to time display.")
+            else: # Not showing custom message, so default to time
+                should_display_time = True
 
-            if update_badge_display:
-                logger.debug(f"Displaying time: {time_str_for_badge}")
-                if send_to_badge(f"S{time_str_for_badge}"):
-                    last_displayed_content_on_badge = time_str_for_badge
-            
-            # Schedule the next time update precisely TIME_UPDATE_INTERVAL_SECONDS from the last scheduled one
-            next_time_update_epoch += TIME_UPDATE_INTERVAL_SECONDS
-            # If we've fallen behind (e.g., due to a long custom text display), catch up.
-            # But don't schedule in the past.
-            if next_time_update_epoch < loop_start_time:
-                 next_time_update_epoch = loop_start_time + TIME_UPDATE_INTERVAL_SECONDS
-
-        # Calculate how long this iteration took
-        loop_duration = time.monotonic() - loop_start_time
+        if should_display_time:
+            # Badge uses HHMMSS format (6 characters)
+            time_string_for_badge = time.strftime("%H%M%S")
+            if time_string_for_badge != last_content_sent_to_badge or not is_displaying_custom_message:
+                # Update if time changed or if we just switched from custom message
+                logger.debug(f"Updating badge time display to: {time_string_for_badge}")
+                if send_command_to_badge(f"S{time_string_for_badge}"):
+                    last_content_sent_to_badge = time_string_for_badge
         
-        # Calculate sleep time to align with the next second (or next interval for time display)
-        time_to_next_event = 0
-        if is_showing_custom_text:
-            # If showing custom text, sleep until it's time to check its end or a short poll interval
-            time_to_next_event = max(0, custom_text_end_time - current_wall_time_epoch)
-            # Ensure we don't sleep too long if custom_text_end_time is far away,
-            # and still poll reasonably often. Min sleep of a short poll interval.
-            sleep_duration = min(time_to_next_event, 0.1) # e.g., check every 100ms
-        else:
-            # If showing time, calculate sleep to hit the next `next_time_update_epoch`
-            time_to_next_event = max(0, next_time_update_epoch - time.monotonic())
-            sleep_duration = time_to_next_event
-
-        # Ensure minimum sleep to prevent busy-looping if calculations are off or events are very frequent
-        sleep_duration = max(0.01, sleep_duration) # Sleep at least 10ms
-
-        if not time_to_die_event.is_set(): # Check again before sleeping
-            time.sleep(sleep_duration)
+        # Calculate sleep time to align with the next second boundary
+        # This aims for more accurate "every second" updates.
+        iteration_processing_time = time.monotonic() - current_monotonic_time
+        sleep_duration = max(0, TIME_DISPLAY_UPDATE_INTERVAL_S - iteration_processing_time)
+        
+        shutdown_event.wait(timeout=sleep_duration) # Sleep but be interruptible by shutdown_event
 
     logger.info("Display manager thread stopped.")
 
-# --- MQTT Callback Functions ---
-def on_connect(client, userdata, flags, rc, properties=None):
-    if rc == 0:
-        logger.info("Connected to MQTT Broker!")
-        client.publish(f"{DEVICE_BASE_TOPIC}/status", "online", retain=True, qos=1)
-        publish_discovery_messages(client)
-        set_initial_badge_and_mqtt_states(client) # Publish initial states
 
-        # Subscribe to command topics
+# --- MQTT Callbacks and Logic ---
+def on_mqtt_connect(client, userdata, flags, rc, properties=None):
+    if rc == 0:
+        logger.info("Successfully connected to MQTT Broker!")
+        client.publish(AVAILABILITY_TOPIC, "online", retain=True, qos=1)
+        publish_mqtt_discovery_messages(client)
+        set_initial_badge_and_mqtt_states(client)
+
+        # Subscribe to all relevant command topics
         client.subscribe(f"{DEVICE_BASE_TOPIC}/text_display/set")
         client.subscribe(f"{DEVICE_BASE_TOPIC}/brightness/set")
         client.subscribe(f"{DEVICE_BASE_TOPIC}/fade_button/press")
         client.subscribe(f"{DEVICE_BASE_TOPIC}/clear_button/press")
         client.subscribe(f"{DEVICE_BASE_TOPIC}/logo_alert_light/set")
-        logger.info("Subscribed to command topics.")
+        logger.info("Subscribed to badge command topics.")
     else:
-        logger.error(f"Failed to connect to MQTT, return code {rc}")
+        logger.error(f"Failed to connect to MQTT, return code: {rc}")
 
-def on_disconnect(client, userdata, flags, reason_code, properties=None):
-    if isinstance(reason_code, int):
+def on_mqtt_disconnect(client, userdata, flags, reason_code, properties=None): # Paho MQTT v2 API signature
+    # Note: LWT should publish "offline". This callback is for logging.
+    if isinstance(reason_code, int): # Older style rc
         logger.warning(f"Disconnected from MQTT Broker with result code: {reason_code}")
-    elif reason_code:
+    elif reason_code: # MQTTReasonCode object for v5
         logger.warning(f"Disconnected from MQTT Broker. Reason: {reason_code.getName()} ({reason_code.value})")
-    else:
+    else: # Client initiated disconnect (rc might be None or 0)
         logger.info("Disconnected from MQTT Broker (client initiated).")
 
-def on_message(client, userdata, msg):
-    global is_showing_custom_text, custom_text_end_time, last_displayed_content_on_badge, current_badge_brightness
+def on_mqtt_message(client, userdata, msg):
+    global is_displaying_custom_message, custom_message_expiry_time, last_content_sent_to_badge, current_badge_brightness_sw_copy
     topic = msg.topic
     payload_str = msg.payload.decode('utf-8', errors='replace').strip()
-    logger.info(f"Received MQTT: Topic='{topic}', Payload='{payload_str}'")
+    logger.info(f"MQTT Message Received: Topic='{topic}', Payload='{payload_str}'")
 
-    entity_topic = topic.replace(f"{DEVICE_BASE_TOPIC}/", "")
+    entity_topic_suffix = topic.replace(f"{DEVICE_BASE_TOPIC}/", "")
 
-    if entity_topic == "text_display/set":
-        with display_mode_lock:
-            text_to_show = payload_str[:30]
-            if send_to_badge(f"S{text_to_show}"):
-                last_displayed_content_on_badge = text_to_show # Update what's on badge
-                is_showing_custom_text = True
-                duration = TEXT_DISPLAY_MIN_DURATION_SECONDS + (len(text_to_show) / CHARS_PER_SECOND_ESTIMATE)
-                custom_text_end_time = time.time() + duration
+    if entity_topic_suffix == "text_display/set":
+        with display_state_lock:
+            text_to_show = payload_str[:30] # Badge 'S' command handles up to 30 chars for scrolling
+            if send_command_to_badge(f"S{text_to_show}"):
+                last_content_sent_to_badge = text_to_show
+                is_displaying_custom_message = True
+                text_len_for_duration = len(text_to_show) if text_to_show else 6 # Assume time length if empty
+                duration = TEXT_MSG_MIN_DURATION_S + (text_len_for_duration / TEXT_MSG_CHARS_PER_SEC)
+                custom_message_expiry_time = time.monotonic() + duration
                 logger.info(f"Displaying custom text '{text_to_show}' for ~{duration:.1f} seconds.")
                 client.publish(f"{DEVICE_BASE_TOPIC}/text_display/state", text_to_show, retain=True, qos=1)
 
-    elif entity_topic == "brightness/set":
+    elif entity_topic_suffix == "brightness/set":
         try:
-            brightness_val = int(payload_str)
-            if 0 <= brightness_val <= 99:
-                if send_to_badge(f"B{brightness_val:02}"):
-                    current_badge_brightness = brightness_val # Update our tracked brightness
-                    client.publish(f"{DEVICE_BASE_TOPIC}/brightness/state", str(brightness_val), retain=True, qos=1)
+            brightness_value = int(payload_str)
+            if 0 <= brightness_value <= 99: # Badge command Bxx takes 00-99
+                if send_command_to_badge(f"B{brightness_value:02}"):
+                    current_badge_brightness_sw_copy = brightness_value
+                    client.publish(f"{DEVICE_BASE_TOPIC}/brightness/state", str(brightness_value), retain=True, qos=1)
             else:
-                logger.warning(f"Brightness value out of range (0-99): {brightness_val}")
+                logger.warning(f"Received brightness value out of range (0-99): {brightness_value}")
         except ValueError:
-            logger.warning(f"Invalid brightness value: {payload_str}")
+            logger.warning(f"Received invalid brightness value: {payload_str}")
 
-    elif entity_topic == "fade_button/press" and payload_str.upper() == "PRESS":
-        send_to_badge("F")
+    elif entity_topic_suffix == "fade_button/press" and payload_str.upper() == "PRESS":
+        send_command_to_badge("F")
 
-    elif entity_topic == "clear_button/press" and payload_str.upper() == "PRESS":
-        if send_to_badge("C"):
-            with display_mode_lock: # Clear current text display state
-                is_showing_custom_text = False
-                custom_text_end_time = 0 # Stop any custom text display
-                last_displayed_content_on_badge = "" # Force time update next cycle
+    elif entity_topic_suffix == "clear_button/press" and payload_str.upper() == "PRESS":
+        if send_command_to_badge("C"): # 'C' command clears screen and logo LEDs on badge
+            with display_state_lock:
+                is_displaying_custom_message = False
+                custom_message_expiry_time = 0
+                last_content_sent_to_badge = "" # Force time update by display_manager
             client.publish(f"{DEVICE_BASE_TOPIC}/text_display/state", "", retain=True, qos=1)
-            client.publish(f"{DEVICE_BASE_TOPIC}/logo_alert_light/state", "OFF", retain=True, qos=1)
+            client.publish(f"{DEVICE_BASE_TOPIC}/logo_alert_light/state", "OFF", retain=True, qos=1) # Reflect in HA
 
-    elif entity_topic == "logo_alert_light/set":
-        all_leds_set_successfully = True
-        target_state_str = "OFF"
+    elif entity_topic_suffix == "logo_alert_light/set":
+        all_leds_action_success = True
+        ha_light_state_to_publish = "OFF"
         if payload_str.upper() == "ON":
-            target_state_str = "ON"
-            for i in range(39):
-                if not send_to_badge(f"L{i:02}1"): all_leds_set_successfully = False; break
+            ha_light_state_to_publish = "ON"
+            for i in range(39): # Turn all 39 logo LEDs ON
+                if not send_command_to_badge(f"L{i:02}1"): all_leds_action_success = False; break
         elif payload_str.upper() == "OFF":
-            for i in range(39):
-                if not send_to_badge(f"L{i:02}0"): all_leds_set_successfully = False; break
+            for i in range(39): # Turn all 39 logo LEDs OFF
+                if not send_command_to_badge(f"L{i:02}0"): all_leds_action_success = False; break
         
-        if all_leds_set_successfully:
-            client.publish(f"{DEVICE_BASE_TOPIC}/logo_alert_light/state", target_state_str, retain=True, qos=1)
+        if all_leds_action_success:
+            client.publish(f"{DEVICE_BASE_TOPIC}/logo_alert_light/state", ha_light_state_to_publish, retain=True, qos=1)
 
-# --- MQTT Discovery and Initial State Publishing ---
-def publish_discovery_messages(client):
-    logger.info("Publishing MQTT discovery messages...")
-    device_info = {
-        "identifiers": [DEVICE_UNIQUE_ID], "name": DEVICE_NAME,
-        "manufacturer": DEVICE_MANUFACTURER, "model": DEVICE_MODEL,
-        "sw_version": DEVICE_SW_VERSION,
-        "configuration_url": "http://hyperglitch.com/articles/dc2025-badge" # Example
+def publish_mqtt_discovery_messages(client):
+    logger.info("Publishing MQTT discovery configuration messages...")
+    device_info_payload = {
+        "identifiers": [DEVICE_UNIQUE_ID], "name": DEVICE_NAME_FRIENDLY,
+        "manufacturer": DEVICE_MANUFACTURER, "model": DEVICE_MODEL_NAME,
+        "sw_version": BRIDGE_SCRIPT_VERSION,
+        "configuration_url": "https://www.dorscluc.org/badge-2025/" # Example URL
     }
-    common_entity_payload = {
-        "device": device_info, "optimistic": False, "retain": True, "qos":1,
-        "availability_topic": f"{DEVICE_BASE_TOPIC}/status",
+    common_entity_params = {
+        "device": device_info_payload, "optimistic": False, "retain": True, "qos": 1,
+        "availability_topic": AVAILABILITY_TOPIC,
         "payload_available": "online", "payload_not_available": "offline"
     }
 
-    text_cfg_topic = f"{DISCOVERY_PREFIX}/text/{DEVICE_UNIQUE_ID}/badge_display_text/config"
-    text_payload = {**common_entity_payload, "name": "Badge Text", "unique_id": f"{DEVICE_UNIQUE_ID}_text",
+    # Text Entity
+    text_entity_id = "badge_display_text"
+    text_config_topic = f"{DISCOVERY_PREFIX}/text/{DEVICE_UNIQUE_ID}/{text_entity_id}/config"
+    text_payload = {**common_entity_params, "name": "Badge Text", "unique_id": f"{DEVICE_UNIQUE_ID}_{text_entity_id}",
                     "state_topic": f"{DEVICE_BASE_TOPIC}/text_display/state",
                     "command_topic": f"{DEVICE_BASE_TOPIC}/text_display/set",
                     "min": 0, "max": 30, "pattern": "^[ -~]*$"}
-    client.publish(text_cfg_topic, json.dumps(text_payload), retain=True, qos=1)
+    client.publish(text_config_topic, json.dumps(text_payload), retain=True, qos=1)
 
-    bright_cfg_topic = f"{DISCOVERY_PREFIX}/number/{DEVICE_UNIQUE_ID}/badge_brightness/config"
-    bright_payload = {**common_entity_payload, "name": "Badge Brightness", "unique_id": f"{DEVICE_UNIQUE_ID}_brightness",
+    # Brightness Number Entity
+    brightness_entity_id = "badge_brightness"
+    bright_config_topic = f"{DISCOVERY_PREFIX}/number/{DEVICE_UNIQUE_ID}/{brightness_entity_id}/config"
+    bright_payload = {**common_entity_params, "name": "Badge Brightness", "unique_id": f"{DEVICE_UNIQUE_ID}_{brightness_entity_id}",
                       "state_topic": f"{DEVICE_BASE_TOPIC}/brightness/state",
                       "command_topic": f"{DEVICE_BASE_TOPIC}/brightness/set",
                       "min": 0, "max": 99, "step": 1, "unit_of_measurement": "%", "mode": "slider"}
-    client.publish(bright_cfg_topic, json.dumps(bright_payload), retain=True, qos=1)
+    client.publish(bright_config_topic, json.dumps(bright_payload), retain=True, qos=1)
 
-    fade_btn_cfg_topic = f"{DISCOVERY_PREFIX}/button/{DEVICE_UNIQUE_ID}/badge_trigger_fade/config"
-    fade_btn_payload = {"name": "Badge Fade", "unique_id": f"{DEVICE_UNIQUE_ID}_fade",
-                        "command_topic": f"{DEVICE_BASE_TOPIC}/fade_button/press",
-                        "device": device_info, "retain": False, "qos":0,
-                        "availability_topic": f"{DEVICE_BASE_TOPIC}/status",
-                        "payload_available": "online", "payload_not_available": "offline"}
-    client.publish(fade_btn_cfg_topic, json.dumps(fade_btn_payload), retain=True, qos=1)
+    # Button common params (no state, qos 0 for commands)
+    button_common_params = {"device": device_info_payload, "retain": False, "qos": 0,
+                            "availability_topic": AVAILABILITY_TOPIC,
+                            "payload_available": "online", "payload_not_available": "offline"}
+    # Fade Button
+    fade_btn_entity_id = "badge_trigger_fade"
+    fade_btn_cfg_topic = f"{DISCOVERY_PREFIX}/button/{DEVICE_UNIQUE_ID}/{fade_btn_entity_id}/config"
+    fade_btn_payload = {**button_common_params, "name": "Badge Fade", "unique_id": f"{DEVICE_UNIQUE_ID}_{fade_btn_entity_id}",
+                        "command_topic": f"{DEVICE_BASE_TOPIC}/fade_button/press"}
+    client.publish(fade_btn_cfg_topic, json.dumps(fade_btn_payload), retain=True, qos=1) # Config is retained
 
-    clear_btn_cfg_topic = f"{DISCOVERY_PREFIX}/button/{DEVICE_UNIQUE_ID}/badge_clear_display/config"
-    clear_btn_payload = {"name": "Badge Clear", "unique_id": f"{DEVICE_UNIQUE_ID}_clear",
-                         "command_topic": f"{DEVICE_BASE_TOPIC}/clear_button/press",
-                         "device": device_info, "retain": False, "qos":0,
-                         "availability_topic": f"{DEVICE_BASE_TOPIC}/status",
-                         "payload_available": "online", "payload_not_available": "offline"}
+    # Clear Button
+    clear_btn_entity_id = "badge_clear_display"
+    clear_btn_cfg_topic = f"{DISCOVERY_PREFIX}/button/{DEVICE_UNIQUE_ID}/{clear_btn_entity_id}/config"
+    clear_btn_payload = {**button_common_params, "name": "Badge Clear", "unique_id": f"{DEVICE_UNIQUE_ID}_{clear_btn_entity_id}",
+                         "command_topic": f"{DEVICE_BASE_TOPIC}/clear_button/press"}
     client.publish(clear_btn_cfg_topic, json.dumps(clear_btn_payload), retain=True, qos=1)
 
-    logo_light_cfg_topic = f"{DISCOVERY_PREFIX}/light/{DEVICE_UNIQUE_ID}/badge_logo_alert/config"
-    logo_light_payload = {**common_entity_payload, "name": "Badge Logo Alert", "unique_id": f"{DEVICE_UNIQUE_ID}_logo_light",
-                          "schema": "basic", 
+    # Logo Alert Light
+    logo_light_entity_id = "badge_logo_alert"
+    logo_light_cfg_topic = f"{DISCOVERY_PREFIX}/light/{DEVICE_UNIQUE_ID}/{logo_light_entity_id}/config"
+    logo_light_payload = {**common_entity_params, "name": "Badge Logo Alert", "unique_id": f"{DEVICE_UNIQUE_ID}_{logo_light_entity_id}",
+                          "schema": "basic", # For simple on/off
                           "state_topic": f"{DEVICE_BASE_TOPIC}/logo_alert_light/state",
                           "command_topic": f"{DEVICE_BASE_TOPIC}/logo_alert_light/set",
                           "payload_on": "ON", "payload_off": "OFF"}
     client.publish(logo_light_cfg_topic, json.dumps(logo_light_payload), retain=True, qos=1)
 
-    logger.info("Discovery messages published.")
+    logger.info("MQTT Discovery messages published.")
 
 def set_initial_badge_and_mqtt_states(client):
-    global current_badge_brightness, last_displayed_content_on_badge
-    logger.info("Setting initial badge state and publishing to MQTT...")
+    global current_badge_brightness_sw_copy, last_content_sent_to_badge
+    logger.info("Setting initial badge hardware state and publishing initial MQTT states...")
     
-    current_badge_brightness = DEFAULT_BADGE_BRIGHTNESS
-    if send_to_badge(f"B{current_badge_brightness:02}"):
-        client.publish(f"{DEVICE_BASE_TOPIC}/brightness/state", str(current_badge_brightness), retain=True, qos=1)
+    current_badge_brightness_sw_copy = DEFAULT_BADGE_BRIGHTNESS
+    if send_command_to_badge(f"B{current_badge_brightness_sw_copy:02}"):
+        client.publish(f"{DEVICE_BASE_TOPIC}/brightness/state", str(current_badge_brightness_sw_copy), retain=True, qos=1)
     
-    if send_to_badge("C"):
-        last_displayed_content_on_badge = "" 
+    if send_command_to_badge("C"): # Clear physical badge display
+        last_content_sent_to_badge = "" # So display_manager will show time initially
         client.publish(f"{DEVICE_BASE_TOPIC}/text_display/state", "", retain=True, qos=1)
     
-    all_logo_off_success = True
+    all_logo_off_ok = True
     for i in range(39):
-        if not send_to_badge(f"L{i:02}0"): all_logo_off_success = False; break
-    if all_logo_off_success:
+        if not send_command_to_badge(f"L{i:02}0"): all_logo_off_ok = False; break
+    if all_logo_off_ok:
         client.publish(f"{DEVICE_BASE_TOPIC}/logo_alert_light/state", "OFF", retain=True, qos=1)
 
-# --- Main Script Execution ---
-def main_mqtt_loop():
-    global mqtt_client_global, display_thread_global
+# --- Main Application Logic & Signal Handling ---
+display_manager_thread_instance = None # To join it on shutdown
 
-    display_thread_global = threading.Thread(target=display_manager_thread_func, daemon=False) # Make non-daemon
-    display_thread_global.start()
+def signal_handler(sig, frame):
+    logger.info(f"Signal {sig} received. Initiating graceful shutdown.")
+    shutdown_event.set() # Signal all threads to stop
 
-    mqtt_client_global = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"badge_bridge_{DEVICE_UNIQUE_ID}")
+def main_application_loop():
+    global mqtt_client_instance, display_manager_thread_instance
+
+    # Start the display manager thread
+    display_manager_thread_instance = threading.Thread(target=display_manager_thread, daemon=False) # Non-daemon
+    display_manager_thread_instance.start()
+
+    mqtt_client_instance = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"badge_bridge_{DEVICE_UNIQUE_ID}")
     if MQTT_USER and MQTT_PASSWORD:
-        mqtt_client_global.username_pw_set(MQTT_USER, MQTT_PASSWORD)
+        mqtt_client_instance.username_pw_set(MQTT_USER, MQTT_PASSWORD)
     
-    mqtt_client_global.will_set(f"{DEVICE_BASE_TOPIC}/status", payload="offline", qos=1, retain=True)
+    mqtt_client_instance.will_set(AVAILABILITY_TOPIC, payload="offline", qos=1, retain=True) # LWT
     
-    mqtt_client_global.on_connect = on_connect
-    mqtt_client_global.on_disconnect = on_disconnect
-    mqtt_client_global.on_message = on_message
+    mqtt_client_instance.on_connect = on_mqtt_connect
+    mqtt_client_instance.on_disconnect = on_mqtt_disconnect
+    mqtt_client_instance.on_message = on_mqtt_message
 
-    while not time_to_die_event.is_set():
+    while not shutdown_event.is_set():
         try:
-            if not mqtt_client_global.is_connected():
-                logger.info(f"Attempting to connect to MQTT broker: {MQTT_BROKER}...")
-                mqtt_client_global.connect(MQTT_BROKER, MQTT_PORT, MQTT_KEEPALIVE)
-                mqtt_client_global.loop_start()
-            time.sleep(5) 
+            if not mqtt_client_instance.is_connected():
+                logger.info(f"Attempting to connect to MQTT broker: {MQTT_BROKER_HOST}...")
+                mqtt_client_instance.connect(MQTT_BROKER_HOST, MQTT_BROKER_PORT, MQTT_KEEPALIVE_INTERVAL)
+                mqtt_client_instance.loop_start() # Handles reconnections automatically in background thread
+            
+            # Main thread can do other things or just wait for shutdown signal
+            shutdown_event.wait(timeout=5.0) # Check event every 5s or when set
+
         except ConnectionRefusedError:
-            logger.error("MQTT connection refused. Retrying in 10 seconds...")
-            if mqtt_client_global.is_connected(): mqtt_client_global.loop_stop()
-            time.sleep(10)
+            logger.error(f"MQTT connection refused by broker {MQTT_BROKER_HOST}. Retrying in {MQTT_RECONNECT_DELAY_S}s...")
+            if mqtt_client_instance.is_connected(): mqtt_client_instance.loop_stop() # Stop if connect failed after loop_start
+            shutdown_event.wait(MQTT_RECONNECT_DELAY_S)
         except Exception as e:
-            logger.error(f"MQTT or other main loop error: {e}. Retrying in 10 seconds...")
-            if mqtt_client_global and mqtt_client_global.is_connected(): mqtt_client_global.loop_stop()
-            time.sleep(10)
+            logger.error(f"Unhandled MQTT or main loop error: {e}. Retrying in {MQTT_RECONNECT_DELAY_S}s...")
+            if mqtt_client_instance and mqtt_client_instance.is_connected(): mqtt_client_instance.loop_stop()
+            shutdown_event.wait(MQTT_RECONNECT_DELAY_S)
+    
+    logger.info("Main application loop terminated due to shutdown signal.")
 
 if __name__ == "__main__":
-    # Set up signal handlers
-    signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl+C
-    signal.signal(signal.SIGTERM, signal_handler) # Catch kill/system shutdown
+    # Setup signal handlers for graceful shutdown on Ctrl+C (SIGINT) and kill (SIGTERM)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     try:
-        main_mqtt_loop()
-    except KeyboardInterrupt:
-        logger.info("Keyboard interrupt in main thread. Initiating shutdown...")
-        time_to_die_event.set() # Signal other threads
+        main_application_loop()
+    except Exception as e: # Catch-all for unexpected errors in main_application_loop itself
+        logger.error(f"Critical error in main_application_loop: {e}", exc_info=True)
     finally:
-        logger.info("Shutdown sequence started...")
-        time_to_die_event.set() # Ensure it's set if not already
+        logger.info("Shutdown sequence initiated in finally block...")
+        # Ensure event is set (might be already by signal handler)
+        shutdown_event.set() 
 
-        # 1. Stop and Join your custom threads first
-        if 'display_thread_global' in globals() and display_thread_global and display_thread_global.is_alive():
+        if display_manager_thread_instance and display_manager_thread_instance.is_alive():
             logger.info("Waiting for display manager thread to join...")
-            display_thread_global.join(timeout=1.5) # Reduced timeout slightly
-            if display_thread_global.is_alive():
+            display_manager_thread_instance.join(timeout=3.0) # Wait for thread to finish
+            if display_manager_thread_instance.is_alive():
                 logger.warning("Display manager thread did not join cleanly.")
-            else:
-                logger.info("Display manager thread joined.")
         
-        # 2. MQTT Cleanup
-        logger.info("Cleaning up MQTT...")
-        if mqtt_client_global: # Check if client was even initialized
-            if mqtt_client_global.is_connected():
+        logger.info("Cleaning up MQTT connection...")
+        if mqtt_client_instance:
+            if mqtt_client_instance.is_connected():
                 try:
-                    mqtt_client_global.publish(f"{DEVICE_BASE_TOPIC}/status", "offline", retain=True, qos=1)
-                    logger.info("Published 'offline' status via MQTT.")
-                except Exception as e:
-                    logger.error(f"Error publishing 'offline' status: {e}")
+                    mqtt_client_instance.publish(AVAILABILITY_TOPIC, "offline", retain=True, qos=1)
+                    logger.info("Published 'offline' availability status.")
+                except Exception as e_pub: logger.error(f"Error publishing 'offline': {e_pub}")
             try:
-                # loop_stop() should be called regardless of connected state if loop_start() was called
-                mqtt_client_global.loop_stop() 
-                logger.info("MQTT loop stopped.")
-            except Exception as e:
-                logger.error(f"Error stopping MQTT loop: {e}")
+                mqtt_client_instance.loop_stop() # Stop the network loop
+                logger.info("MQTT network loop stopped.")
+            except Exception as e_loop: logger.error(f"Error stopping MQTT loop: {e_loop}")
             try:
-                if mqtt_client_global.is_connected(): # Only disconnect if connected
-                    mqtt_client_global.disconnect()
+                if mqtt_client_instance.is_connected(): # Check again before disconnect
+                    mqtt_client_instance.disconnect()
                     logger.info("Disconnected from MQTT broker.")
-            except Exception as e: # This is where your TypeError was
-                logger.error(f"Error disconnecting from MQTT broker: {e}")
+            except Exception as e_disc: logger.error(f"Error disconnecting from MQTT: {e_disc}")
         
-        # 3. Serial Cleanup
-        logger.info("Attempting final serial cleanup...")
-        with serial_lock: # Still use lock for consistency
-            if ser and ser.is_open:
-                logger.info("Serial port is open, attempting to send final messages and close.")
-                final_commands = [
-                    f"B{DEFAULT_BADGE_BRIGHTNESS:02}", # Reset brightness
-                    "C",                               # Clear
-                    "SBye..."                          # Final message
-                ]
-                for cmd_root in final_commands:
-                    cmd = cmd_root + "\r\n"
-                    try:
-                        logger.debug(f"Attempting final send: {cmd.strip()}")
-                        # pyserial write() can take bytes or str (if encoding is set on Serial)
-                        # but explicitly encode to be safe.
-                        # The write_timeout on Serial object should apply here.
-                        ser.write(cmd.encode('utf-8'))
-                        # A very short delay for the badge to process, but not too long
-                        # as we are shutting down.
-                        time.sleep(0.02) 
-                    except serial.SerialTimeoutException:
-                        logger.warning(f"Timeout sending final command: {cmd.strip()}")
-                        break # Stop trying if one times out
-                    except Exception as e:
-                        logger.error(f"Error sending final command {cmd.strip()}: {e}")
-                        break # Stop trying if other error
-                
+        logger.info("Cleaning up serial port...")
+        with serial_port_lock:
+            if serial_port_instance and serial_port_instance.is_open:
                 try:
-                    ser.close()
+                    send_command_to_badge(f"B{DEFAULT_BADGE_BRIGHTNESS:02}", max_retries=0)
+                    send_command_to_badge("C", max_retries=0)
+                    send_command_to_badge("SBye! :)", max_retries=0)
+                    time.sleep(0.3) # Allow final commands to be sent
+                    serial_port_instance.close()
                     logger.info("Serial port closed.")
-                except Exception as e:
-                    logger.error(f"Error closing serial port: {e}")
-            else:
-                logger.info("Serial port was not open or 'ser' object is None. No final messages sent.")
-        logger.info("Badge bridge script stopped.")
+                except Exception as e_serial:
+                    logger.error(f"Error during final serial port cleanup: {e_serial}")
+        logger.info("Badge MQTT bridge stopped.")
