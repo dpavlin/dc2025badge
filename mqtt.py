@@ -6,6 +6,7 @@ import json
 import threading
 import logging
 import importlib.metadata # For version checking if needed later
+import signal # Add signal handling
 
 # --- Configuration ---
 BADGE_SERIAL_PORT = "/dev/ttyACM0"  # <<< CHANGE THIS if your port is different
@@ -43,6 +44,7 @@ ser = None
 serial_lock = threading.Lock() # For thread-safe access to serial port
 mqtt_client_global = None # To allow access from signal handler
 time_to_die_event = threading.Event() # For signaling threads to stop
+display_thread_global = None # Make display thread accessible globally
 
 # State management for display (text vs. time)
 display_mode_lock = threading.Lock()
@@ -51,6 +53,10 @@ custom_text_end_time = 0
 last_displayed_content_on_badge = "" # Tracks what was last sent as "S..."
 current_badge_brightness = DEFAULT_BADGE_BRIGHTNESS # Assumed initial, updated by commands
 
+# --- Signal Handler ---
+def signal_handler(sig, frame):
+    logger.info(f"Signal {sig} received. Setting time_to_die_event.")
+    time_to_die_event.set()
 
 # --- Badge Serial Communication ---
 def connect_serial_port():
@@ -201,9 +207,13 @@ def on_connect(client, userdata, flags, rc, properties=None):
     else:
         logger.error(f"Failed to connect to MQTT, return code {rc}")
 
-def on_disconnect(client, userdata, rc, properties=None):
-    logger.warning(f"Disconnected from MQTT Broker with result code {rc}.")
-    # LWT should publish "offline"
+def on_disconnect(client, userdata, flags, reason_code, properties=None):
+    if isinstance(reason_code, int):
+        logger.warning(f"Disconnected from MQTT Broker with result code: {reason_code}")
+    elif reason_code:
+        logger.warning(f"Disconnected from MQTT Broker. Reason: {reason_code.getName()} ({reason_code.value})")
+    else:
+        logger.info("Disconnected from MQTT Broker (client initiated).")
 
 def on_message(client, userdata, msg):
     global is_showing_custom_text, custom_text_end_time, last_displayed_content_on_badge, current_badge_brightness
@@ -337,10 +347,10 @@ def set_initial_badge_and_mqtt_states(client):
 
 # --- Main Script Execution ---
 def main_mqtt_loop():
-    global mqtt_client_global 
+    global mqtt_client_global, display_thread_global
 
-    display_thread = threading.Thread(target=display_manager_thread_func, daemon=True)
-    display_thread.start()
+    display_thread_global = threading.Thread(target=display_manager_thread_func, daemon=False) # Make non-daemon
+    display_thread_global.start()
 
     mqtt_client_global = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=f"badge_bridge_{DEVICE_UNIQUE_ID}")
     if MQTT_USER and MQTT_PASSWORD:
@@ -356,7 +366,6 @@ def main_mqtt_loop():
         try:
             if not mqtt_client_global.is_connected():
                 logger.info(f"Attempting to connect to MQTT broker: {MQTT_BROKER}...")
-                # Add a timeout to the connect call
                 mqtt_client_global.connect(MQTT_BROKER, MQTT_PORT, MQTT_KEEPALIVE)
                 mqtt_client_global.loop_start()
             time.sleep(5) 
@@ -370,49 +379,83 @@ def main_mqtt_loop():
             time.sleep(10)
 
 if __name__ == "__main__":
+    # Set up signal handlers
+    signal.signal(signal.SIGINT, signal_handler)  # Catch Ctrl+C
+    signal.signal(signal.SIGTERM, signal_handler) # Catch kill/system shutdown
+
     try:
         main_mqtt_loop()
     except KeyboardInterrupt:
-        logger.info("Keyboard interrupt received. Shutting down...")
+        logger.info("Keyboard interrupt in main thread. Initiating shutdown...")
+        time_to_die_event.set() # Signal other threads
     finally:
-        logger.info("Initiating shutdown sequence...")
-        time_to_die_event.set() 
+        logger.info("Shutdown sequence started...")
+        time_to_die_event.set() # Ensure it's set if not already
 
+        # 1. Stop and Join your custom threads first
+        if 'display_thread_global' in globals() and display_thread_global and display_thread_global.is_alive():
+            logger.info("Waiting for display manager thread to join...")
+            display_thread_global.join(timeout=1.5) # Reduced timeout slightly
+            if display_thread_global.is_alive():
+                logger.warning("Display manager thread did not join cleanly.")
+            else:
+                logger.info("Display manager thread joined.")
+        
+        # 2. MQTT Cleanup
         logger.info("Cleaning up MQTT...")
-        if mqtt_client_global:
+        if mqtt_client_global: # Check if client was even initialized
             if mqtt_client_global.is_connected():
                 try:
                     mqtt_client_global.publish(f"{DEVICE_BASE_TOPIC}/status", "offline", retain=True, qos=1)
                     logger.info("Published 'offline' status via MQTT.")
                 except Exception as e:
                     logger.error(f"Error publishing 'offline' status: {e}")
-                try:
-                    mqtt_client_global.loop_stop() # No 'force' argument
-                    logger.info("MQTT loop stopped.")
-                except Exception as e:
-                    logger.error(f"Error stopping MQTT loop: {e}")
-                try:
+            try:
+                # loop_stop() should be called regardless of connected state if loop_start() was called
+                mqtt_client_global.loop_stop() 
+                logger.info("MQTT loop stopped.")
+            except Exception as e:
+                logger.error(f"Error stopping MQTT loop: {e}")
+            try:
+                if mqtt_client_global.is_connected(): # Only disconnect if connected
                     mqtt_client_global.disconnect()
                     logger.info("Disconnected from MQTT broker.")
-                except Exception as e:
-                    logger.error(f"Error disconnecting from MQTT broker: {e}")
-            else:
-                 try: mqtt_client_global.loop_stop()
-                 except: pass
+            except Exception as e: # This is where your TypeError was
+                logger.error(f"Error disconnecting from MQTT broker: {e}")
         
-        # Wait for display manager thread to finish its current iteration if it's crucial
-        # display_thread.join(timeout=2) # This was not defined in main's scope
-
-        logger.info("Cleaning up serial port...")
-        with serial_lock:
+        # 3. Serial Cleanup
+        logger.info("Attempting final serial cleanup...")
+        with serial_lock: # Still use lock for consistency
             if ser and ser.is_open:
+                logger.info("Serial port is open, attempting to send final messages and close.")
+                final_commands = [
+                    f"B{DEFAULT_BADGE_BRIGHTNESS:02}", # Reset brightness
+                    "C",                               # Clear
+                    "SBye..."                          # Final message
+                ]
+                for cmd_root in final_commands:
+                    cmd = cmd_root + "\r\n"
+                    try:
+                        logger.debug(f"Attempting final send: {cmd.strip()}")
+                        # pyserial write() can take bytes or str (if encoding is set on Serial)
+                        # but explicitly encode to be safe.
+                        # The write_timeout on Serial object should apply here.
+                        ser.write(cmd.encode('utf-8'))
+                        # A very short delay for the badge to process, but not too long
+                        # as we are shutting down.
+                        time.sleep(0.02) 
+                    except serial.SerialTimeoutException:
+                        logger.warning(f"Timeout sending final command: {cmd.strip()}")
+                        break # Stop trying if one times out
+                    except Exception as e:
+                        logger.error(f"Error sending final command {cmd.strip()}: {e}")
+                        break # Stop trying if other error
+                
                 try:
-                    send_to_badge(f"B{DEFAULT_BADGE_BRIGHTNESS:02}", max_retries=0)
-                    send_to_badge("C", max_retries=0)
-                    send_to_badge("SBye...", max_retries=0)
-                    time.sleep(0.2) 
                     ser.close()
                     logger.info("Serial port closed.")
                 except Exception as e:
-                    logger.error(f"Error during final serial cleanup: {e}")
-        logger.info("Badge bridge stopped.")
+                    logger.error(f"Error closing serial port: {e}")
+            else:
+                logger.info("Serial port was not open or 'ser' object is None. No final messages sent.")
+        logger.info("Badge bridge script stopped.")
