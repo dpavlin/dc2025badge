@@ -1603,8 +1603,10 @@ volatile bool notifier_leds_changed = true;
 volatile char notifier_string[32] = "";
 volatile uint8_t notifier_segments[6][9] = {0};
 volatile bool notifier_update = false;
+volatile uint8_t notifier_pwm_segments[6][9] = {0}; // Store PWM values (0-100) for each segment
 
-volatile uint8_t notifier_pwm_segments[6][9]; // Add this line to store PWM values for each segment
+// Function prototype
+void matrix_pwm_segment(uint8_t char_idx, uint8_t seg_idx, uint8_t pwm_value_0_100);
 
 void handle_notifier(){
 	init_display_text("CTRL");
@@ -1627,46 +1629,63 @@ void handle_notifier(){
 				old_mode = notifier_mode;
 				display_text_set_external(true);
 				// Initialize PWM values to default brightness
+				uint8_t initial_pwm = g_config[SETT_BRIGHTNESS];
+				if (initial_pwm > 100) initial_pwm = 100;
+				
 				for(int pos_idx=0; pos_idx<6; pos_idx++){
 					for(int seg_idx=0; seg_idx<9; seg_idx++){
-						notifier_pwm_segments[pos_idx][seg_idx] = g_config[SETT_BRIGHTNESS];
+						notifier_pwm_segments[pos_idx][seg_idx] = initial_pwm;
 					}
 				}
 			}
+			
+			// Set on/off states for segments
 			for(int pos_idx=0; pos_idx<6; pos_idx++){
 				for(int seg_idx=0; seg_idx<9; seg_idx++){
 					const uint8_t *rc = char_matrix[pos_idx][seg_idx];
 					matrix_write(rc, notifier_segments[pos_idx][seg_idx]);
-					if (notifier_segments[pos_idx][seg_idx]) {
-						matrix_pwm_segment(pos_idx, seg_idx, notifier_pwm_segments[pos_idx][seg_idx]);
-					}
 				}
 			}
-			//matrix_update();
-			break;
-		}
-
-		// handle leds
-		if(notifier_leds_changed){
-			notifier_leds_changed = false;
-			for(int i=0; i<39; i++){
-				matrix_write(logo_matrix[i], notifier_leds[i]);
+			
+			// Handle logo LEDs
+			if(notifier_leds_changed){
+				notifier_leds_changed = false;
+				for(int i=0; i<39; i++){
+					matrix_write(logo_matrix[i], notifier_leds[i]);
+				}
 			}
+			
 			matrix_update();
+			break;
 		}
 
 		nfc_loop();
 	}
 }
 
-void matrix_pwm_segment(uint8_t char_idx, uint8_t seg_idx, uint8_t pwm_value) {
+void matrix_pwm_segment(uint8_t char_idx, uint8_t seg_idx, uint8_t pwm_value_0_100) {
     if (char_idx >= 6 || seg_idx >= 9) return; // Validate inputs
+
+    // Scale PWM value from 0-100 to 0-255 for IS31FL3731
+    uint8_t scaled_pwm;
+    if (pwm_value_0_100 == 0) {
+        scaled_pwm = 0;
+    } else if (pwm_value_0_100 >= 100) {
+        scaled_pwm = 255;
+    } else {
+        scaled_pwm = (uint8_t)(((uint32_t)pwm_value_0_100 * 255) / 100);
+    }
+
     const uint8_t *rc = char_matrix[char_idx][seg_idx];
     uint8_t row = rc[0];
     uint8_t column = rc[1];
-    uint8_t reg = REG_PAGE_PWM_START + row * 8 + column; // Calculate PWM register
+    
+    // Calculate PWM register address (0x24-0xB3)
+    // Each row has 8 LEDs, so multiply row by 8 and add column
+    uint8_t pwm_register = REG_PAGE_PWM_START + (row * 8 + column);
+    
     led_select_frame(REG_FRAME_0); // Select frame 0 for PWM settings
-    led_write_register(reg, pwm_value); // Write PWM value
+    led_write_register(pwm_register, scaled_pwm);
 }
 
 bool handle_notifier_command(uint8_t *buffer){
@@ -1725,8 +1744,16 @@ bool handle_notifier_command(uint8_t *buffer){
 			notifier_mode = NOTIFIER_MODE_CUSTOM;
 			const int pos = buffer[1]-'0';
 			const int seg = buffer[2]-'0';
-			notifier_segments[pos][seg] = buffer[3]-'0';
-			notifier_leds_changed = true;
+			uint8_t on_off_state = buffer[3]-'0';
+			notifier_segments[pos][seg] = on_off_state;
+
+			if (on_off_state == 1) {
+				// If turning ON, apply its stored PWM value
+				matrix_pwm_segment(pos, seg, notifier_pwm_segments[pos][seg]);
+			} else {
+				// If turning OFF, set PWM to 0
+				matrix_pwm_segment(pos, seg, 0);
+			}
 			notifier_update = true;
 			return true;
 		}
@@ -1766,9 +1793,17 @@ bool handle_notifier_command(uint8_t *buffer){
 			const int seg = buffer[2]-'0';
 			const int pwm = (buffer[3]-'0')*10 + (buffer[4]-'0');
 			if (pwm > 100) return false; // Validate PWM range
+			
 			notifier_pwm_segments[pos][seg] = pwm;
 			matrix_pwm_segment(pos, seg, pwm);
-			notifier_leds_changed = true;
+			
+			// If PWM is non-zero, ensure segment is on
+			if (pwm > 0) {
+				notifier_segments[pos][seg] = 1;
+			} else {
+				notifier_segments[pos][seg] = 0;
+			}
+			
 			notifier_update = true;
 			return true;
 		}
