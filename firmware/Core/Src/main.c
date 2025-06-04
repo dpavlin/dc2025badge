@@ -1604,6 +1604,8 @@ volatile char notifier_string[32] = "";
 volatile uint8_t notifier_segments[6][9] = {0};
 volatile bool notifier_update = false;
 
+volatile uint8_t notifier_pwm_segments[6][9]; // Add this line to store PWM values for each segment
+
 void handle_notifier(){
 	init_display_text("CTRL");
 	set_tag_handle_callback(badge_handle_tag);
@@ -1624,13 +1626,23 @@ void handle_notifier(){
 			if(old_mode==NOTIFIER_MODE_TEXT){
 				old_mode = notifier_mode;
 				display_text_set_external(true);
+				// Initialize PWM values to default brightness
+				for(int pos_idx=0; pos_idx<6; pos_idx++){
+					for(int seg_idx=0; seg_idx<9; seg_idx++){
+						notifier_pwm_segments[pos_idx][seg_idx] = g_config[SETT_BRIGHTNESS];
+					}
+				}
 			}
 			for(int pos_idx=0; pos_idx<6; pos_idx++){
 				for(int seg_idx=0; seg_idx<9; seg_idx++){
-				    const uint8_t *rc = char_matrix[pos_idx][seg_idx];
-				    matrix_write(rc, notifier_segments[pos_idx][seg_idx]);
+					const uint8_t *rc = char_matrix[pos_idx][seg_idx];
+					matrix_write(rc, notifier_segments[pos_idx][seg_idx]);
+					if (notifier_segments[pos_idx][seg_idx]) {
+						matrix_pwm_segment(pos_idx, seg_idx, notifier_pwm_segments[pos_idx][seg_idx]);
+					}
 				}
 			}
+			//matrix_update();
 			break;
 		}
 
@@ -1647,6 +1659,15 @@ void handle_notifier(){
 	}
 }
 
+void matrix_pwm_segment(uint8_t char_idx, uint8_t seg_idx, uint8_t pwm_value) {
+    if (char_idx >= 6 || seg_idx >= 9) return; // Validate inputs
+    const uint8_t *rc = char_matrix[char_idx][seg_idx];
+    uint8_t row = rc[0];
+    uint8_t column = rc[1];
+    uint8_t reg = REG_PAGE_PWM_START + row * 8 + column; // Calculate PWM register
+    led_select_frame(REG_FRAME_0); // Select frame 0 for PWM settings
+    led_write_register(reg, pwm_value); // Write PWM value
+}
 
 bool handle_notifier_command(uint8_t *buffer){
 	// expects a null terminated string
@@ -1731,6 +1752,26 @@ bool handle_notifier_command(uint8_t *buffer){
 		const int b = (buffer[1]-'0')*10 + (buffer[2]-'0');
 		g_config[SETT_BRIGHTNESS] = b;
 		return true;
+		break;
+	case 'p':
+	case 'P':
+		// PWM command: P<char_idx><seg_idx><pwm_value>
+		// Example: P0123 sets PWM value 23 for segment 1 of character 0
+		if(buffer[1]<'0' || buffer[1]>'5' || buffer[2]<'0' || buffer[2]>'8' ||
+		   buffer[3]<'0' || buffer[3]>'9' || buffer[4]<'0' || buffer[4]>'9') {
+			return false;
+		} else {
+			notifier_mode = NOTIFIER_MODE_CUSTOM;
+			const int pos = buffer[1]-'0';
+			const int seg = buffer[2]-'0';
+			const int pwm = (buffer[3]-'0')*10 + (buffer[4]-'0');
+			if (pwm > 100) return false; // Validate PWM range
+			notifier_pwm_segments[pos][seg] = pwm;
+			matrix_pwm_segment(pos, seg, pwm);
+			notifier_leds_changed = true;
+			notifier_update = true;
+			return true;
+		}
 		break;
 	}
 	return false;
