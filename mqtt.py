@@ -375,37 +375,49 @@ if __name__ == "__main__":
         # Ensure event is set (might be already by signal handler)
         shutdown_event.set() 
 
+        # 1. Join the display manager thread
         if display_manager_thread_instance and display_manager_thread_instance.is_alive():
             logger.info("Waiting for display manager thread to join...")
-            display_manager_thread_instance.join(timeout=3.0) # Wait for thread to finish
+            display_manager_thread_instance.join(timeout=1.5) # Reduced timeout slightly
             if display_manager_thread_instance.is_alive():
                 logger.warning("Display manager thread did not join cleanly.")
+            else:
+                logger.info("Display manager thread joined.")
         
+        # 2. MQTT Cleanup
         logger.info("Cleaning up MQTT connection...")
         if mqtt_client_instance:
             if mqtt_client_instance.is_connected():
                 try:
                     mqtt_client_instance.publish(AVAILABILITY_TOPIC, "offline", retain=True, qos=1)
                     logger.info("Published 'offline' availability status.")
-                except Exception as e_pub: logger.error(f"Error publishing 'offline': {e_pub}")
+                except Exception as e_pub: 
+                    logger.error(f"Error publishing 'offline': {e_pub}")
             try:
                 mqtt_client_instance.loop_stop() # Stop the network loop
                 logger.info("MQTT network loop stopped.")
-            except Exception as e_loop: logger.error(f"Error stopping MQTT loop: {e_loop}")
+            except Exception as e_loop: 
+                logger.error(f"Error stopping MQTT loop: {e_loop}")
             try:
                 if mqtt_client_instance.is_connected(): # Check again before disconnect
                     mqtt_client_instance.disconnect()
                     logger.info("Disconnected from MQTT broker.")
-            except Exception as e_disc: logger.error(f"Error disconnecting from MQTT: {e_disc}")
+            except Exception as e_disc: 
+                logger.error(f"Error disconnecting from MQTT: {e_disc}")
+            else: # Not connected, but ensure loop is stopped if it was started
+                try: mqtt_client_instance.loop_stop()
+                except: pass # Ignore if loop_stop fails on non-started/already-stopped loop
         
-        logger.info("Cleaning up serial port...")
+        # 3. Serial Cleanup
+        logger.info("Attempting final serial cleanup...")
         with serial_port_lock:
             if serial_port_instance and serial_port_instance.is_open:
                 try:
+                    # Send final commands with max_retries=0 to avoid hanging
                     send_command_to_badge(f"B{DEFAULT_BADGE_BRIGHTNESS:02}", max_retries=0)
                     send_command_to_badge("C", max_retries=0)
                     send_command_to_badge("SBye! :)", max_retries=0)
-                    time.sleep(0.3) # Allow final commands to be sent
+                    time.sleep(0.2) # Allow final commands to be sent
                     serial_port_instance.close()
                     logger.info("Serial port closed.")
                 except Exception as e_serial:
